@@ -121,6 +121,18 @@ void OCSS::ToBase(string& Data,int Original_Base,int New_Base)
     Data = return_value;
     return;
 }
+int Char_Value(char chars)
+{
+    #pragma omp parallel for
+    for (int values = 0; values < Char_List.length() ; values++)
+    {
+        if (Char_List[values] == chars)
+        {
+            break;
+        }
+    }
+    return values;
+}
 bool OCSS::check()
 {
     string x = "ASC";
