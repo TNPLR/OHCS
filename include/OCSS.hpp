@@ -18,6 +18,7 @@ class OCSS
         void Encrypt(string& Data,vector<char>& Key);
         void Decrypt(string& Data,vector<char>& Key);
         void ToBase(string& Data,int Original_Base,int New_Base);
+        int Char_Value(char chars);
         bool check();
         bool DMode;
     protected:
