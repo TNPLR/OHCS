@@ -6,9 +6,10 @@
 #include <cstdio>
 #include <iostream>
 #include <algorithm>
-
+#include <string>
 #include "../bigint/BigIntegerLibrary.hh"
-#include "omp.h"
+#include <omp.h>
+#include <cstring>
 using namespace std;
 class OCSS
 {
@@ -21,10 +22,8 @@ class OCSS
         int Char_Value(char chars);
         bool check();
         bool DMode;
-    protected:
-
-    private:
-        string Char_List;
+	void del(char *src, char remove_key);
+	void del(string &str, char remove_key);
 };
 
 #endif // OCSS_H
