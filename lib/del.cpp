@@ -2,6 +2,7 @@
 #include <string>
 #include <string.h>
 using namespace std;
+#ifdef UNIX
 void del(char *src, char remove_key)
 {
         char * fp = src;
@@ -21,3 +22,22 @@ void del(string &str, char remove_key)
         del(tmp, remove_key);
         str = tmp;
 }
+#endif
+#ifdef WIN32
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <cstdlib>
+#include <limits>
+using namespace std;
+void dell::remove(char* charToRemove, string &str) {
+	//string s = "Pineapple";
+	//char chars[] = "p";
+	for (unsigned int i = 0; i < strlen(charToRemove); ++i)
+	{
+		str.erase(remove(str.begin(), str.end(), charToRemove[i]), str.end());
+	}
+
+}
+
+#endif // WIN32

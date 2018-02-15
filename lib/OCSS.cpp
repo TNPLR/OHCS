@@ -75,7 +75,15 @@ void Decrypt(string& Data,vector<char>& Key)
 #ifdef DEBUG
                 printf("Base %d-\"%c\"||", remove_value + 1, Char_List[remove_value]);cout<<Data<<'\n';
 #endif
-	    	del(Data,remove_key);
+#ifdef UNIX
+				del(Data, remove_key);
+#endif
+#ifdef WIN32
+				char tmpRemove[] = {remove_key};
+				dell::remove(tmpRemove,Data);
+#endif // WIN32
+
+	    	
 		//replace( Data.begin(), Data.end(), remove_key, '\0');
 #ifdef DEBUG
                 printf("Base %d-\"%c\"||", remove_value, Char_List[remove_value - 1]);cout<<Data<<'\n';

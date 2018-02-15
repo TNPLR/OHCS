@@ -24,8 +24,8 @@
 	along with Ollolol and Hsiaosvideo Cryptography System.  If not, see <http://www.gnu.org/licenses/>.
 */
 /* 
-  This is the main file of OHCS
-  Made by Hsiaosvideo
+?This is the main file of OHCS
+?Made by Hsiaosvideo
   2017/07/21
 */
 #include "main.hpp"
@@ -206,12 +206,9 @@ int main(int argc, char* argv[]){
 #ifdef WIN32
 	ios_base::sync_with_stdio(false);
 	string new_data = "";
-	if(_checkAlpha)
-		cout<<"data: "<<data<<'\n';
-	else{
-		cout<<" Data:\n";
-		getline(cin,data);
-	}
+	
+	cout<<" Data:\n";
+	getline(cin,data);
 	cout<<" Key:"<<'\n';	
 	getline(cin,key);
 
