@@ -17,7 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with Ollolol and Hsiaosvideo Cryptography System.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "../include/argv.hpp"
+#include "argv.hpp"
 extern char file;
 extern char *ReadFile;
 int argvCheck(char* argv){

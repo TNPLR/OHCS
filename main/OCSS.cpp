@@ -1,4 +1,4 @@
-#include "../include/OCSS.hpp"
+#include "OCSS.hpp"
 void OCSS::del(char *src, char remove_key)
 {
 	char * fp = src;
@@ -20,7 +20,6 @@ void OCSS::del(string &str, char remove_key)
 }
 OCSS::OCSS()
 {
-        DMode = true;
         ios_base::sync_with_stdio(false);
         srand(time(NULL));
 }
@@ -32,9 +31,10 @@ OCSS::~OCSS()
 void OCSS::Encrypt(string& Data,vector<char>& Key)
 {
         int last_key = 95;
-        if(DMode == true)
-        {printf("Base %d-\"%c\"||", 95, Char_List[94]);cout<<Data<<'\n';}
-        for(char &plugin_key : Key)
+#ifdef DEBUG
+        printf("Base %d-\"%c\"||", 95, Char_List[94]);cout<<Data<<'\n';
+#endif
+	for(char &plugin_key : Key)
         {
                 int plugin_value = 0;
                 #pragma omp parallel for
@@ -46,9 +46,10 @@ void OCSS::Encrypt(string& Data,vector<char>& Key)
                         }
                 }
                 ToBase(Data, last_key, plugin_value);
-                if(DMode == true)
-                {printf("Base %d-\"%c\"||", plugin_value, Char_List[plugin_value - 1]);cout<<Data<<'\n';}
-                unsigned int plugin_count = rand()%Data.length()/3+1;
+#ifdef DEBUG
+                printf("Base %d-\"%c\"||", plugin_value, Char_List[plugin_value - 1]);cout<<Data<<'\n';
+#endif
+	    	unsigned int plugin_count = rand()%Data.length()/3+1;
                 vector<unsigned int> plugin_location;
                 while (plugin_count > 0)
                 {
@@ -71,9 +72,10 @@ void OCSS::Encrypt(string& Data,vector<char>& Key)
                         Data = new_data;
                 }
                 last_key = (int)(plugin_value + 1);
-                if(DMode == true)
-                {printf("Base %d-\"%c\"||", plugin_value + 1, Char_List[plugin_value]); cout<<Data<<'\n';}//Debug
-        }
+#ifdef DEBUG
+                printf("Base %d-\"%c\"||", plugin_value + 1, Char_List[plugin_value]); cout<<Data<<'\n';//Debug
+#endif
+	}
         ToBase(Data, last_key, 95);
         return;
 }
@@ -81,8 +83,9 @@ void OCSS::Decrypt(string& Data,vector<char>& Key)
 {
         int last_key = 95;
         reverse(Key.begin(), Key.end());
-        if(DMode == true)
-        {printf("Base %d-\"%c\"||", 95, Char_List[94]);cout<<Data<<'\n';}
+#ifdef DEBUG
+        printf("Base %d-\"%c\"||", 95, Char_List[94]);cout<<Data<<'\n';
+#endif
         for(char remove_key : Key)
         {
                 int remove_value = 0;
@@ -96,12 +99,14 @@ void OCSS::Decrypt(string& Data,vector<char>& Key)
                         }
                 }
                 ToBase(Data, last_key, (int)(remove_value + 1));
-                if(DMode == true)
-                {printf("Base %d-\"%c\"||", remove_value + 1, Char_List[remove_value]);cout<<Data<<'\n';}
-                del(Data,remove_key);
+#ifdef DEBUG
+                printf("Base %d-\"%c\"||", remove_value + 1, Char_List[remove_value]);cout<<Data<<'\n';
+#endif
+	    	del(Data,remove_key);
 		//replace( Data.begin(), Data.end(), remove_key, '\0');
-                if(DMode == true)
-                {printf("Base %d-\"%c\"||", remove_value, Char_List[remove_value - 1]);cout<<Data<<'\n';}
+#ifdef DEBUG
+                printf("Base %d-\"%c\"||", remove_value, Char_List[remove_value - 1]);cout<<Data<<'\n';
+#endif
                 last_key = remove_value;
         }
         ToBase(Data, last_key, 95);
