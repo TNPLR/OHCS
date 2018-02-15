@@ -33,12 +33,14 @@
 char file = 0;
 char R[100];
 char *ReadFile = R;
-
+#include "del.hpp"
 #include <fstream>
 #include "OCSS.hpp"
 //#include <thread>
-#include <unistd.h>
+#ifdef UNIX
 #include <getopt.h>
+#endif
+#ifdef UNIX
 const char* program_name;
 void print_usage(FILE* stream, int exit_code)
 {
@@ -53,29 +55,81 @@ void print_usage(FILE* stream, int exit_code)
 		"\t-v\t--version\tShow the Version.\n");
 	exit(exit_code);
 }
+void file_in_cs(int mode,string input_filename,string key, string output_filename)
+{
+	vector<char> keys;
+	for (char &x : key) {
+		keys.push_back(x);
+	}
+	ifstream fin;
+	fin.open(input_filename);
+	if(!fin) { 
+		cerr << "Error:Can not input this file.\n";
+	       	exit(-1);
+	}
+	string inputStr;
+	vector<string> inputContent;
+	while(getline(fin, inputStr)){
+		inputContent.push_back(inputStr);
+	}
+#ifdef DEBUG
+	for(int i=0; i < inputContent.size();i++){
+		cout<<inputContent[i]<<endl;
+	}
+#endif
+	fin.close();
+	ofstream out(output_filename);
+	if(mode){	
+        	reverse(keys.begin(), keys.end());
+		for(int i=0; i < inputContent.size(); i++){
+			Decrypt(inputContent[i], keys);
+			out << inputContent[i] << endl;
+		}
+	}
+	else{
+		for(int i=0; i < inputContent.size(); i++){
+			Encrypt(inputContent[i], keys);
+			out << inputContent[i] << endl;
+		}
+	}
+	out.close();
+	exit(0);
+}
+#endif
 using namespace std;
 void version_show(const string version)
 {
-	cout<<" Ollolol and Hsiaosvideo Crytoservice System\n Vesion "<<version<<'\n';
+#ifdef WIN32
+	cout<<"OH Crytoservice System on Windows\n Vesion "<<version<<'\n';
+#endif
+#ifdef UNIX
+	cout<<"OH Crytoservice System on Unix\nVesion "<<version<<'\n';
+#endif
+#ifdef Unknown
+	cout<<"OH Crytoservice Systems\n Vesion "<<version<<'\n';
+#endif
 	exit(0);
 }
 int main(int argc, char* argv[]){
 	string key;
 	string data;
+#ifdef UNIX
 	int next_option;
-	const char* const short_options = "vhedD:i:k:";
+	const char* const short_options = "o:vhedi:k:";
 	const struct option long_options[] = {
 		{"help",0,NULL,'h'},
 		{"encrypt",0,NULL,'e'},
 		{"decrypt",0,NULL,'d'},
-		{"data",1,NULL,'D'},
+		//{"data",1,NULL,'D'},
 		{"input",1,NULL,'i'},
 		{"key",1,NULL,'k'},
 		{"version",0,NULL,'v'},
+		{"output",1,NULL,'o'},
 		{NULL,0,NULL,0}
 	};
 	const string version = "1.1";
-	const char* input_filename = NULL;
+	string input_filename = "";
+	string output_filename = "";
 	int mode = 0; // Encrypt:0, Decrypt 1
 	program_name = argv[0];
 	do {
@@ -90,10 +144,14 @@ int main(int argc, char* argv[]){
 			case 'd':
 				mode = 1;
 				break;
+			/*
 			case 'D':
+				data_mode = 0;
 				data = optarg;
-				
+				data[0] = '\0';
+				data[data.length()] = '\0';
 				break;
+			*/
 			case 'e':
 				mode = 0;
 				break;
@@ -102,6 +160,9 @@ int main(int argc, char* argv[]){
 				break;
 			case 'v':
 				version_show(version);
+			case 'o':
+				output_filename = optarg;
+				break;
 			case '?': /* The user specified an invalid option. */
 				print_usage (stderr, 1);
 			case -1:
@@ -110,6 +171,13 @@ int main(int argc, char* argv[]){
 				abort();
 		}
 	}while(next_option != -1);
+	if(!(input_filename.compare("")) || !(output_filename.compare("")))
+	{
+		cerr<<"ERROR: Input file or output file undefine."<<endl;
+		exit(0);
+	}
+	file_in_cs(mode,input_filename,key,output_filename);
+#endif
 	/*
 	int _checkAlpha = 1;
 	for(int a = 0;a < argc;a++){
@@ -135,25 +203,25 @@ int main(int argc, char* argv[]){
 	}
 	*/
 	//threadtest(version);
+#ifdef WIN32
 	ios_base::sync_with_stdio(false);
 	string new_data = "";
-	OCSS x;
-
-	//getline(cin,key);
-	/*
 	if(_checkAlpha)
 		cout<<"data: "<<data<<'\n';
 	else{
 		cout<<" Data:\n";
 		getline(cin,data);
 	}
-	cout<<" Key:"<<'\n';
-	
-	*/
+	cout<<" Key:"<<'\n';	
+	getline(cin,key);
+
 	vector<char> keys;
 	for (char &x : key) {
 		keys.push_back(x);
 	}
+#endif
+#ifdef UNIX
+	/*
 	if(mode){
 		x.Decrypt(data, keys);
 		cout<<data<<endl;
@@ -162,20 +230,22 @@ int main(int argc, char* argv[]){
 		x.Encrypt(data, keys);
 		cout<<data<<endl;
 	}
-	/*
+	*/
+#endif
+#ifdef WIN32
 	string Select;
 	cout<<"[E]ncrypt or [D]ecrypt?\n";
 	cin>>Select;
 
 	if(Select == "E"){
-		x.Encrypt(data, keys);
+		Encrypt(data, keys);
 		printf("\nResult:\n");
 		cout<<data<<endl;
 	}
 	else if(Select == "ED"){
 		time_t start, end;
 		start = time(NULL);
-		x.Encrypt(data, keys);
+		Encrypt(data, keys);
 		end = time(NULL);
 		double diff = difftime(end, start);
 		printf("\nResult:\n");
@@ -184,16 +254,16 @@ int main(int argc, char* argv[]){
 		cout<<data<<endl;
 	}
 	else if(Select == "DD"){
-		x.Decrypt(data, keys);
+		Decrypt(data, keys);
 		printf("\nResult:\n");
 		cout<<data<<endl;
 	}
 	else{
-		x.Decrypt(data, keys);
+		Decrypt(data, keys);
 		printf("\nResult:\n");
 		cout<<data<<endl;
 	}
-	*/
+#endif
 
 
 	//x.Decrypt(data, keys);
