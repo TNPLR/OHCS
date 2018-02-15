@@ -3,8 +3,7 @@ INCLUDE_DIRECTORIES (${OHCS_SOURCE_DIR}/lib)
 LINK_DIRECTORIES (${OHCS_BINARY_DIR}/lib)
 ADD_EXECUTABLE (
 	ohcs
-	OCSS.cpp
 	argv.cpp
 	main.cpp
 )
-TARGET_LINK_LIBRARIES (ohcs del bigint)
+TARGET_LINK_LIBRARIES (ohcs del bigint OCSS)

@@ -1,34 +1,7 @@
 #include "OCSS.hpp"
-void OCSS::del(char *src, char remove_key)
-{
-	char * fp = src;
-	while (*src) {
-		if (*src != remove_key) { 
-			*fp = *src;
-			fp++;
-		}
-		src++;
-	}
-	*fp = '\0' ; 
-}
-void OCSS::del(string &str, char remove_key) 
-{
-	char tmp[str.size()+1];
-	memcpy(&tmp, str.c_str(), str.size() + 1);
-	del(tmp, remove_key);
-	str = tmp;
-}
-OCSS::OCSS()
-{
-        ios_base::sync_with_stdio(false);
-        srand(time(NULL));
-}
+#include "del.hpp"
 string Char_List = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ `-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?";
-OCSS::~OCSS()
-{
-        //dtor
-}
-void OCSS::Encrypt(string& Data,vector<char>& Key)
+void Encrypt(string& Data,vector<char>& Key)
 {
         int last_key = 95;
 #ifdef DEBUG
@@ -77,16 +50,16 @@ void OCSS::Encrypt(string& Data,vector<char>& Key)
 #endif
 	}
         ToBase(Data, last_key, 95);
-        return;
+        printf("Base %d-\"%c\"||", 95, Char_List[94]); cout<<Data<<'\n';
+	return;
 }
-void OCSS::Decrypt(string& Data,vector<char>& Key)
+void Decrypt(string& Data,vector<char>& Key)
 {
         int last_key = 95;
-        reverse(Key.begin(), Key.end());
 #ifdef DEBUG
         printf("Base %d-\"%c\"||", 95, Char_List[94]);cout<<Data<<'\n';
 #endif
-        for(char remove_key : Key)
+        for(char &remove_key : Key)
         {
                 int remove_value = 0;
                 //#pragma omp parallel for
@@ -110,8 +83,9 @@ void OCSS::Decrypt(string& Data,vector<char>& Key)
                 last_key = remove_value;
         }
         ToBase(Data, last_key, 95);
+	printf("Base %d-\"%c\"||", 95, Char_List[94]); cout<<Data<<'\n';
 }
-void OCSS::ToBase(string& Data,int Original_Base,int New_Base)
+void ToBase(string& Data,int Original_Base,int New_Base)
 {
         if (Original_Base == 0 || Original_Base == 1 || New_Base == 0 || New_Base == 1 || Data == "")
         {
@@ -156,7 +130,7 @@ int Char_Value(char chars)
         }
         return values;
 }
-bool OCSS::check()
+bool check()
 {
         string x = "ASC";
         string z = x;
