@@ -97,7 +97,7 @@ void file_in_cs(int mode,string input_filename,string key, string output_filenam
 }
 #endif
 using namespace std;
-void version_show(const string version)
+void version_show()
 {
 #ifdef WIN32
 	cout<<"OH Crytoservice System on Windows\n Vesion "<<version<<'\n';
@@ -158,7 +158,7 @@ int main(int argc, char* argv[]){
 				key = optarg;
 				break;
 			case 'v':
-				version_show(version);
+				version_show();
 			case 'o':
 				output_filename = optarg;
 				break;
