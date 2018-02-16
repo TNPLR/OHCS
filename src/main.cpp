@@ -29,7 +29,7 @@ Made by Hsiaosvideo
   2017/07/21
 */
 #pragma once
-#define version "1.3"
+#define version "1.4"
 #include <stdio.h>
 char file = 0;
 char R[100];
