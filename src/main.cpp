@@ -116,6 +116,7 @@ void version_show()
 int main(int argc, char* argv[]){
 	string key;
 	string data;
+	srand(time(NULL));
 #ifdef UNIX
 	int next_option;
 	const char* const short_options = "o:vhedi:k:";
@@ -241,23 +242,8 @@ int main(int argc, char* argv[]){
 		printf("\nResult:\n");
 		cout<<data<<endl;
 	}
-	else if(Select == "ED"){
-		time_t start, end;
-		start = time(NULL);
-		Encrypt(data, keys);
-		end = time(NULL);
-		double diff = difftime(end, start);
-		printf("\nResult:\n");
-
-		printf("Time = %f\n", diff);
-		cout<<data<<endl;
-	}
-	else if(Select == "DD"){
-		Decrypt(data, keys);
-		printf("\nResult:\n");
-		cout<<data<<endl;
-	}
 	else{
+		reverse(keys.begin(), keys.end());
 		Decrypt(data, keys);
 		printf("\nResult:\n");
 		cout<<data<<endl;
