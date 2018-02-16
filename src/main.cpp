@@ -205,7 +205,7 @@ int main(int argc, char* argv[]){
 #ifdef WIN32
 	ios_base::sync_with_stdio(false);
 	string new_data = "";
-	
+	version_show();
 	cout<<" Data:\n";
 	getline(cin,data);
 	cout<<" Key:"<<'\n';	
@@ -259,6 +259,7 @@ int main(int argc, char* argv[]){
 		printf("\nResult:\n");
 		cout<<data<<endl;
 	}
+	system("pause");
 #endif
 
 
