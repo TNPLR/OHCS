@@ -28,11 +28,13 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
+#pragma once
 #define version "1.3"
 #include <stdio.h>
 char file = 0;
 char R[100];
 char *ReadFile = R;
+#include <stdlib.h>
 #include "del.hpp"
 #include <fstream>
 #include "OCSS.hpp"
@@ -101,6 +103,7 @@ void version_show()
 {
 #ifdef WIN32
 	cout<<"OH Crytoservice System on Windows\n Vesion "<<version<<'\n';
+	return;
 #endif
 #ifdef UNIX
 	cout<<"OH Crytoservice System on Unix\nVesion "<<version<<'\n';
@@ -205,7 +208,7 @@ int main(int argc, char* argv[]){
 #ifdef WIN32
 	ios_base::sync_with_stdio(false);
 	string new_data = "";
-	
+	version_show();
 	cout<<" Data:\n";
 	getline(cin,data);
 	cout<<" Key:"<<'\n';	
@@ -259,6 +262,7 @@ int main(int argc, char* argv[]){
 		printf("\nResult:\n");
 		cout<<data<<endl;
 	}
+	system("pause");
 #endif
 
 

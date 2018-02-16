@@ -50,8 +50,10 @@ void Encrypt(string& Data,vector<char>& Key)
 #endif
 	}
         ToBase(Data, last_key, 95);
+#ifdef DEBUG
         printf("Base %d-\"%c\"||", 95, Char_List[94]); cout<<Data<<'\n';
-	return;
+#endif
+		return;
 }
 void Decrypt(string& Data,vector<char>& Key)
 {
@@ -91,7 +93,9 @@ void Decrypt(string& Data,vector<char>& Key)
                 last_key = remove_value;
         }
         ToBase(Data, last_key, 95);
+#ifdef DEBUG
 	printf("Base %d-\"%c\"||", 95, Char_List[94]); cout<<Data<<'\n';
+#endif
 }
 void ToBase(string& Data,int Original_Base,int New_Base)
 {
