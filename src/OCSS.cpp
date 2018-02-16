@@ -12,7 +12,7 @@ void Encrypt(string& Data,vector<char>& Key)
         {
                 int plugin_value = 0;
                 //#pragma omp parallel for
-                for (unsigned int values = 0; values < Char_List.length() ; values++)
+                for (unsigned int values = 0; values < Char_List.length() ; ++values)
                 {
                         if (Char_List[values] == plugin_key)
                         {
@@ -35,7 +35,7 @@ void Encrypt(string& Data,vector<char>& Key)
                 {
                         string new_data = "";
                         //#pragma omp parallel for
-                        for (unsigned int x = 0; x < Data.length(); x++)
+                        for (unsigned int x = 0; x < Data.length(); ++x)
                         {
                                 if (x == this_location)
                                 {
@@ -67,7 +67,7 @@ void Decrypt(string& Data,vector<char>& Key)
         {
                 int remove_value = 0;
                 //#pragma omp parallel for
-                for (int values = 0; values < Char_List.length(); values++)
+                for (int values = 0; values < Char_List.length(); ++values)
                 {
                         if (Char_List[values] == remove_key)
                         {
@@ -87,7 +87,7 @@ void Decrypt(string& Data,vector<char>& Key)
 				dell::remove(tmpRemove,Data);
 #endif // WIN32
 
-	    	
+
 		//replace( Data.begin(), Data.end(), remove_key, '\0');
 #ifdef DEBUG
                 printf("Base %d-\"%c\"||", remove_value, Char_List[remove_value - 1]);cout<<Data<<'\n';
@@ -111,7 +111,7 @@ void ToBase(string& Data,int Original_Base,int New_Base)
                 total_value *= Original_Base;
                 unsigned int values = 0;
                 //#pragma omp parallel for
-                for (; values < Char_List.length(); values++)
+                for (; values < Char_List.length(); ++values)
                 {
                         if (Char_List[values] == data)
                         {
@@ -136,7 +136,7 @@ int Char_Value(char chars)
 {
         unsigned int values;
         //#pragma omp parallel for
-        for (values = 0; values < Char_List.length() ; values++)
+        for (values = 0; values < Char_List.length() ; ++values)
         {
                 if (Char_List[values] == chars)
                 {
