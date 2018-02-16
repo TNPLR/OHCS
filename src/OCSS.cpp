@@ -131,6 +131,7 @@ void ToBase(string& Data,int Original_Base,int New_Base)
         Data = return_value;
         return;
 }
+#ifdef DEBUG
 int Char_Value(char chars)
 {
         unsigned int values;
@@ -156,3 +157,4 @@ bool check()
         }
         return false;
 }
+#endif

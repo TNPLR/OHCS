@@ -16,9 +16,8 @@ using namespace std;
 void Encrypt(string& Data,vector<char>& Key);
 void Decrypt(string& Data,vector<char>& Key);
 void ToBase(string& Data,int Original_Base,int New_Base);
+#ifdef DEBUG
 int Char_Value(char chars);
 bool check();
-void del(char *src, char remove_key);
-void del(string &str, char remove_key);
-
+#endif
 #endif // OCSS_H
