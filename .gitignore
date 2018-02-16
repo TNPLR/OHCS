@@ -5,5 +5,5 @@ ohcs
 cmake*
 CMakeC*
 CMakeF*
-Make*
 *.a
+*.log

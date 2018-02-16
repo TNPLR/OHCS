@@ -1,9 +1,9 @@
 #ifndef OCSS_H
 #define OCSS_H
-#include <cstdlib>
+#include <stdlib.h>
 #include <vector>
-#include <ctime>
-#include <cstdio>
+#include <time.h>
+#include <stdio.h>
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -11,7 +11,7 @@
 #ifdef WIN32
 #include <omp.h>
 #endif
-#include <cstring>
+#include <string.h>
 using namespace std;
 void Encrypt(string& Data,vector<char>& Key);
 void Decrypt(string& Data,vector<char>& Key);
