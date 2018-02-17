@@ -3,7 +3,8 @@
 string Char_List = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ `-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?";
 void Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key)
 {
-        	int last_key = 95;
+        int last_key = 95;
+
 #ifdef DEBUG
         printf("Base %d-\"%c\"||", 95, Char_List[94]);cout<<Data<<'\n';
 #endif
