@@ -16,7 +16,7 @@
 #endif
 #include <string.h>
 using namespace std;
-void Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key const);
+void Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key);
 void Decrypt(string& Data,vector<char>& Key);
 void ToBase(string& Data,int Original_Base,int New_Base);
 #ifdef DEBUG

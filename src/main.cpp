@@ -39,9 +39,11 @@ char *ReadFile = R;
 #include <getopt.h>
 #endif
 #ifdef UNIX
-const std::string version = "1.5";
+const std::string version = "1.6";
 const char* program_name;
-void print_usage(FILE* stream, int exit_code) __attribute__ ((__noreturn__))
+void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
+void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));
+void print_usage(FILE* stream, int exit_code)
 {
 	fprintf(stream, "Usage: %s [-e | -d] options [-i input-file]\n", program_name);
 	fprintf(stream,
@@ -54,11 +56,7 @@ void print_usage(FILE* stream, int exit_code) __attribute__ ((__noreturn__))
 		"\t-v\t--version\tShow the Version.\n");
 	exit(exit_code);
 }
-void file_in_cs(int mode,std::string input_filename,
-								std::string key, std::string output_filename)
-								__attribute__ ((__noreturn__)) __attribute__ ((const));
-void file_in_cs(int mode,std::string input_filename,
-								std::string key, std::string output_filename)
+void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename)
 {
 	std::vector<char> keys;
 	for (char &x : key) {

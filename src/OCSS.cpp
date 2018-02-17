@@ -1,7 +1,7 @@
 #include "OCSS.hpp"
 #include "del.hpp"
 string Char_List = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ `-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?";
-void Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key const)
+void Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key)
 {
         	int last_key = 95;
 #ifdef DEBUG
