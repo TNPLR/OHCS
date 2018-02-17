@@ -1,15 +1,16 @@
 #include "OCSS.hpp"
 #include "del.hpp"
 string Char_List = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ `-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?";
-void Encrypt(string& Data,vector<char>& Key)
+void Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key)
 {
         int last_key = 95;
+
 #ifdef DEBUG
         printf("Base %d-\"%c\"||", 95, Char_List[94]);cout<<Data<<'\n';
 #endif
-	for(char &plugin_key : Key)
+	for(char plugin_key : Key)
         {
-                int plugin_value = 0;
+					int plugin_value = 0;
                 //#pragma omp parallel for
                 for (unsigned int values = 0; values < Char_List.length() ; ++values)
                 {
@@ -84,9 +85,6 @@ void Decrypt(string& Data,vector<char>& Key)
 				char tmpRemove[] = {remove_key};
 				dell::remove(tmpRemove,Data);
 #endif // WIN32
-
-
-		//replace( Data.begin(), Data.end(), remove_key, '\0');
 #ifdef DEBUG
                 printf("Base %d-\"%c\"||", remove_value, Char_List[remove_value - 1]);cout<<Data<<'\n';
 #endif

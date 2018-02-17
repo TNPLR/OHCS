@@ -22,12 +22,15 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
+#ifndef __GNUC__
+# define __attribute__(x) /*NOTHING*/
+#endif
 #pragma once
-#include <stdio.h>
+#include <cstdio>
 char file = 0;
 char R[100];
 char *ReadFile = R;
-#include <stdlib.h>
+#include <cstdlib>
 #include "del.hpp"
 #include <fstream>
 #include "OCSS.hpp"
@@ -36,24 +39,26 @@ char *ReadFile = R;
 #include <getopt.h>
 #endif
 #ifdef UNIX
-const std::string version = "1.5";
+const std::string version = "1.6";
 const char* program_name;
+void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
+void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));
 void print_usage(FILE* stream, int exit_code)
 {
 	fprintf(stream, "Usage: %s [-e | -d] options [-i input-file]\n", program_name);
 	fprintf(stream,
-		"\t-h\t--help\t\tDisplay this help page.\n"
+		"\t-h\t--help\t\t\tDisplay this help page.\n"
 		"\t-e\t--encrypt\t\tEncrypt mode.\n"
 		"\t-d\t--decrypt\t\tDecrypt mode.\n"
 		"\t-D\t--data [input-data]\tImport Data.\n"
 		"\t-i\t--input [input-file]\tSelect input file.\n"
-		"\t-k\t--key [key]\tImport the key.\n"
-		"\t-v\t--version\tShow the Version.\n");
+		"\t-k\t--key [key]\t\tImport the key.\n"
+		"\t-v\t--version\t\tShow the Version.\n");
 	exit(exit_code);
 }
-void file_in_cs(int mode,string input_filename,string key, string output_filename)
+void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename)
 {
-	vector<char> keys;
+	std::vector<char> keys;
 	for (char &x : key) {
 		keys.push_back(x);
 	}
@@ -63,8 +68,8 @@ void file_in_cs(int mode,string input_filename,string key, string output_filenam
 		cerr << "Error:Can not input this file.\n";
 	       	exit(-1);
 	}
-	string inputStr;
-	vector<string> inputContent;
+	std::string inputStr;
+	std::vector<string> inputContent;
 	while(getline(fin, inputStr)){
 		inputContent.push_back(inputStr);
 	}
