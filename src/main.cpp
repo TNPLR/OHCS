@@ -1,9 +1,3 @@
-
-
-
-
-
-
 /*
 	Copyright (C) 2017 CHAW-HUNG, HSIAO
 
@@ -23,13 +17,12 @@
 	You should have received a copy of the GNU General Public License
 	along with OH Cryptography System.  If not, see <http://www.gnu.org/licenses/>.
 */
-/* 
+/*
 This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
 #pragma once
-#define version "1.5"
 #include <stdio.h>
 char file = 0;
 char R[100];
@@ -43,11 +36,12 @@ char *ReadFile = R;
 #include <getopt.h>
 #endif
 #ifdef UNIX
+const std::string version = "1.5";
 const char* program_name;
 void print_usage(FILE* stream, int exit_code)
 {
 	fprintf(stream, "Usage: %s [-e | -d] options [-i input-file]\n", program_name);
-	fprintf(stream, 
+	fprintf(stream,
 		"\t-h\t--help\t\tDisplay this help page.\n"
 		"\t-e\t--encrypt\t\tEncrypt mode.\n"
 		"\t-d\t--decrypt\t\tDecrypt mode.\n"
@@ -65,7 +59,7 @@ void file_in_cs(int mode,string input_filename,string key, string output_filenam
 	}
 	ifstream fin;
 	fin.open(input_filename);
-	if(!fin) { 
+	if(!fin) {
 		cerr << "Error:Can not input this file.\n";
 	       	exit(-1);
 	}
@@ -81,7 +75,7 @@ void file_in_cs(int mode,string input_filename,string key, string output_filenam
 #endif
 	fin.close();
 	ofstream out(output_filename);
-	if(mode){	
+	if(mode){
         	reverse(keys.begin(), keys.end());
 		for(int i=0; i < inputContent.size(); i++){
 			Decrypt(inputContent[i], keys);
@@ -191,18 +185,18 @@ int main(int argc, char* argv[]){
 	}
 	if(_checkAlpha){
 		FILE *file2 = fopen(ReadFile, "r");
-		if(!file2) { 
-			printf("Error: Can not read the file."); 
-			return 1; 
+		if(!file2) {
+			printf("Error: Can not read the file.");
+			return 1;
 		}
 		char dataINPUT[128];
 		int gg__gg = 0;
 		char ch;
-		while((ch = fgetc(file2)) != EOF) { 
+		while((ch = fgetc(file2)) != EOF) {
 			dataINPUT[gg__gg] = ch;
 			++gg__gg;
 		}
-		data = dataINPUT; 
+		data = dataINPUT;
 	}
 	*/
 	//threadtest(version);
@@ -212,7 +206,7 @@ int main(int argc, char* argv[]){
 	version_show();
 	cout<<" Data:\n";
 	getline(cin,data);
-	cout<<" Key:"<<'\n';	
+	cout<<" Key:"<<'\n';
 	getline(cin,key);
 
 	vector<char> keys;
