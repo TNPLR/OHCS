@@ -3,14 +3,13 @@
 string Char_List = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ `-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?";
 void Encrypt(string& Data,vector<char>& Key const)
 {
-					srand(time(NULL));
         	int last_key = 95;
 #ifdef DEBUG
         printf("Base %d-\"%c\"||", 95, Char_List[94]);cout<<Data<<'\n';
 #endif
 	for(char plugin_key : Key)
         {
-                int plugin_value = 0;
+					int plugin_value = 0;
                 //#pragma omp parallel for
                 for (unsigned int values = 0; values < Char_List.length() ; ++values)
                 {
@@ -58,7 +57,6 @@ void Encrypt(string& Data,vector<char>& Key const)
 }
 void Decrypt(string& Data,vector<char>& Key)
 {
-		srand(time(NULL));
         int last_key = 95;
 #ifdef DEBUG
         printf("Base %d-\"%c\"||", 95, Char_List[94]);cout<<Data<<'\n';
