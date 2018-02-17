@@ -47,13 +47,13 @@ void print_usage(FILE* stream, int exit_code)
 {
 	fprintf(stream, "Usage: %s [-e | -d] options [-i input-file]\n", program_name);
 	fprintf(stream,
-		"\t-h\t--help\t\tDisplay this help page.\n"
+		"\t-h\t--help\t\t\tDisplay this help page.\n"
 		"\t-e\t--encrypt\t\tEncrypt mode.\n"
 		"\t-d\t--decrypt\t\tDecrypt mode.\n"
 		"\t-D\t--data [input-data]\tImport Data.\n"
 		"\t-i\t--input [input-file]\tSelect input file.\n"
-		"\t-k\t--key [key]\tImport the key.\n"
-		"\t-v\t--version\tShow the Version.\n");
+		"\t-k\t--key [key]\t\tImport the key.\n"
+		"\t-v\t--version\t\tShow the Version.\n");
 	exit(exit_code);
 }
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename)
