@@ -22,12 +22,15 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
+#ifndef __GNUC__
+# define __attribute__(x) /*NOTHING*/
+#endif
 #pragma once
-#include <stdio.h>
+#include <cstdio>
 char file = 0;
 char R[100];
 char *ReadFile = R;
-#include <stdlib.h>
+#include <cstdlib>
 #include "del.hpp"
 #include <fstream>
 #include "OCSS.hpp"
@@ -38,7 +41,7 @@ char *ReadFile = R;
 #ifdef UNIX
 const std::string version = "1.5";
 const char* program_name;
-void print_usage(FILE* stream, int exit_code)
+void print_usage(FILE* stream, int exit_code) __attribute__ ((__noreturn__))
 {
 	fprintf(stream, "Usage: %s [-e | -d] options [-i input-file]\n", program_name);
 	fprintf(stream,
@@ -51,9 +54,13 @@ void print_usage(FILE* stream, int exit_code)
 		"\t-v\t--version\tShow the Version.\n");
 	exit(exit_code);
 }
-void file_in_cs(int mode,string input_filename,string key, string output_filename)
+void file_in_cs(int mode,std::string input_filename,
+								std::string key, std::string output_filename)
+								__attribute__ ((__noreturn__)) __attribute__ ((const));
+void file_in_cs(int mode,std::string input_filename,
+								std::string key, std::string output_filename)
 {
-	vector<char> keys;
+	std::vector<char> keys;
 	for (char &x : key) {
 		keys.push_back(x);
 	}
@@ -63,8 +70,8 @@ void file_in_cs(int mode,string input_filename,string key, string output_filenam
 		cerr << "Error:Can not input this file.\n";
 	       	exit(-1);
 	}
-	string inputStr;
-	vector<string> inputContent;
+	std::string inputStr;
+	std::vector<string> inputContent;
 	while(getline(fin, inputStr)){
 		inputContent.push_back(inputStr);
 	}
