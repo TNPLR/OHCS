@@ -25,3 +25,5 @@ into a string. Therefore, OHCS can encrypt the same string to different string.
 The compiler needs to support c++11 standard
 # INSTALL
 Please read INSTALL before installing the program.
+# Bugs
+    -The system will encrypt data fail randomly. We did not know what cause the problem.
