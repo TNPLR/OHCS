@@ -22,6 +22,7 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
+#include <regex>
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
 #endif
@@ -66,12 +67,19 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 	fin.open(input_filename);
 	if(!fin) {
 		cerr << "Error:Can not input this file.\n";
-	       	exit(-1);
+		exit(-1);
 	}
 	std::string inputStr;
 	std::vector<string> inputContent;
-	while(getline(fin, inputStr)){
-		inputContent.push_back(inputStr);
+	if(!mode){			
+		while(getline(fin, inputStr)){
+			inputContent.push_back("#" + inputStr);
+		}
+	}
+	else{		
+		while(getline(fin, inputStr)){
+			inputContent.push_back(inputStr);
+		}
 	}
 #ifdef DEBUG
 	for(int i=0; i < inputContent.size();i++){
@@ -81,18 +89,31 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 	fin.close();
 	ofstream out(output_filename);
 	if(mode){
-        	reverse(keys.begin(), keys.end());
+		reverse(keys.begin(), keys.end());
 		for(int i=0; i < inputContent.size(); i++){
-			Decrypt(inputContent[i], keys);
+			OCSS::Decrypt(inputContent[i], keys);
+			inputContent[i].erase(0,1);
 			out << inputContent[i] << endl;
 		}
 	}
+#ifdef SEOHCS
+	else{
+		std::string NewData;
+		for(int i=0; i < inputContent.size(); i++){
+			std::cout << "Line:"<< i+1<<endl;
+			NewData = OCSS::SafetyEncrypt(inputContent[i], keys);
+			out << NewData << endl;
+		}
+	}
+#endif
+#ifndef SEOHCS
 	else{
 		for(int i=0; i < inputContent.size(); i++){
-			Encrypt(inputContent[i], keys);
+			OCSS::Encrypt(inputContent[i], keys);
 			out << inputContent[i] << endl;
 		}
 	}
+#endif
 	out.close();
 	exit(0);
 }
@@ -237,13 +258,13 @@ int main(int argc, char* argv[]){
 	cin>>Select;
 
 	if(Select == "E"){
-		Encrypt(data, keys);
+		OCSS::Encrypt(data, keys);
 		printf("\nResult:\n");
 		cout<<data<<endl;
 	}
 	else{
 		reverse(keys.begin(), keys.end());
-		Decrypt(data, keys);
+		OCSS::Decrypt(data, keys);
 		printf("\nResult:\n");
 		cout<<data<<endl;
 	}
