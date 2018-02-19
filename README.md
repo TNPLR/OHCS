@@ -27,3 +27,5 @@ The compiler needs to support c++11 standard
 Please read INSTALL before installing the program.
 # Bugs
     -The system will encrypt data fail randomly. We did not know what cause the problem.
+    -Please add SEOHCS (Security OHCS mode) to decrease fail chance.
+    -If there is "0" in the encrypt data. Sometimes it fail.

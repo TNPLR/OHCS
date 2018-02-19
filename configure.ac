@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([ohcs], [1.6], [BUG-REPORT-ADDRESS])
+AC_INIT([ohcs], [1.6.1], [BUG-REPORT-ADDRESS])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 AC_CONFIG_HEADERS([config.h])
 # Checks for programs.
