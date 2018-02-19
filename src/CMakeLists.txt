@@ -1,4 +1,3 @@
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 INCLUDE_DIRECTORIES (${OHCS_SOURCE_DIR}/include)
 ADD_EXECUTABLE (
 	ohcs
@@ -12,7 +11,5 @@ ADD_EXECUTABLE (
        	BigIntegerUtils.cc
 
 )
-install(TARGETS ohcs
-	RUNTIME DESTINATION bin
-)
-
+install (TARGET ohcs
+	RUNTIME DESTINATION bin)
