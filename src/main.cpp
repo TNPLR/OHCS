@@ -42,7 +42,7 @@ char *ReadFile = R;
 #include <getopt.h>
 #endif
 #ifdef UNIX
-const std::string version = "1.6.1";
+const std::string version = "2.0.0";
 const char* program_name;
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
 void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));
@@ -72,20 +72,13 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 		exit(-1);
 	}
 	std::string inputStr;
-	std::vector<std::string> inputContent;
-	if(!mode){			
-		while(getline(fin, inputStr)){
-			inputContent.push_back(inputStr);
-		}
-	}
-	else{		
-		while(getline(fin, inputStr)){
-			inputContent.push_back(inputStr);
-		}
+	std::vector<std::string> inputContent;	
+	while(getline(fin, inputStr)){
+		inputContent.push_back(inputStr);
 	}
 #ifdef DEBUG
 	for(unsigned int i=0; i < inputContent.size();i++){
-		cout<<inputContent[i]<<endl;
+		cout<<inputContent[i]<<endl;	
 	}
 #endif
 	fin.close();
@@ -106,8 +99,11 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 		std::string NewData;
 		for(unsigned int i=0; i < inputContent.size(); i++){
 			const unsigned char * constStr = reinterpret_cast<const unsigned char *> (inputContent[i].c_str());
+#ifdef DEBUG
+			cout << constStr << endl;
+#endif
 			inputContent[i] = base64_encode(constStr,
-							sizeof(constStr) / sizeof(unsigned char));
+							inputContent[i].length());
 			std::cout << "Line:"<< i+1<<endl;
 			NewData = OCSS::SafetyEncrypt(inputContent[i], keys);
 			out << NewData << endl;
