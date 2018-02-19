@@ -22,7 +22,6 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
-#include <regex>
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
 #endif
@@ -40,7 +39,7 @@ char *ReadFile = R;
 #include <getopt.h>
 #endif
 #ifdef UNIX
-const std::string version = "1.6";
+const std::string version = "1.6.1";
 const char* program_name;
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
 void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));
