@@ -11,6 +11,7 @@
 #include "BigIntegerLibrary.hh"
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
+# define __restrict__ /*NOTHING*/
 #endif
 #ifdef WIN32
 #include <omp.h>

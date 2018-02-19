@@ -9,7 +9,6 @@ ADD_EXECUTABLE (
 	BigInteger.cc 
 	BigUnsignedInABase.cc
        	BigIntegerUtils.cc
+	base64.cpp
 
 )
-install (TARGET ohcs
-	RUNTIME DESTINATION bin)

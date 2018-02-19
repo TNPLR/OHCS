@@ -22,14 +22,20 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
+#ifndef SEOHCS
+#define SEOHCS
+#endif
+#include "base64.h"
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
 #endif
 #pragma once
 #include <cstdio>
+/*
 char file = 0;
 char R[100];
 char *ReadFile = R;
+*/
 #include <cstdlib>
 #include "del.hpp"
 #include <fstream>
@@ -38,8 +44,9 @@ char *ReadFile = R;
 #ifdef UNIX
 #include <getopt.h>
 #endif
+const std::string version = "2.0.0";
 #ifdef UNIX
-const std::string version = "1.6.1";
+
 const char* program_name;
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
 void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));
@@ -62,43 +69,45 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 	for (char &x : key) {
 		keys.push_back(x);
 	}
-	ifstream fin;
+	std::ifstream fin;
 	fin.open(input_filename);
 	if(!fin) {
 		cerr << "Error:Can not input this file.\n";
 		exit(-1);
 	}
 	std::string inputStr;
-	std::vector<string> inputContent;
-	if(!mode){			
-		while(getline(fin, inputStr)){
-			inputContent.push_back("#" + inputStr);
-		}
-	}
-	else{		
-		while(getline(fin, inputStr)){
-			inputContent.push_back(inputStr);
-		}
+	std::vector<std::string> inputContent;	
+	while(getline(fin, inputStr)){
+		inputContent.push_back(inputStr);
 	}
 #ifdef DEBUG
-	for(int i=0; i < inputContent.size();i++){
-		cout<<inputContent[i]<<endl;
+	for(unsigned int i=0; i < inputContent.size();i++){
+		cout<<inputContent[i]<<endl;	
 	}
 #endif
 	fin.close();
-	ofstream out(output_filename);
+	std::ofstream out(output_filename);
+	std::string tmp_wstring;
 	if(mode){
 		reverse(keys.begin(), keys.end());
-		for(int i=0; i < inputContent.size(); i++){
+		for(unsigned int i=0; i < inputContent.size(); i++){
 			OCSS::Decrypt(inputContent[i], keys);
-			inputContent[i].erase(0,1);
-			out << inputContent[i] << endl;
+			//inputContent[i].erase(0,1);
+			tmp_wstring = base64_decode(inputContent[i]);
+			cout << tmp_wstring << endl;
+			out << tmp_wstring << endl;
 		}
 	}
 #ifdef SEOHCS
 	else{
 		std::string NewData;
-		for(int i=0; i < inputContent.size(); i++){
+		for(unsigned int i=0; i < inputContent.size(); i++){
+			const unsigned char * constStr = reinterpret_cast<const unsigned char *> (inputContent[i].c_str());
+#ifdef DEBUG
+			cout << constStr << endl;
+#endif
+			inputContent[i] = base64_encode(constStr,
+							inputContent[i].length());
 			std::cout << "Line:"<< i+1<<endl;
 			NewData = OCSS::SafetyEncrypt(inputContent[i], keys);
 			out << NewData << endl;
@@ -107,7 +116,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 #endif
 #ifndef SEOHCS
 	else{
-		for(int i=0; i < inputContent.size(); i++){
+		for(unsigned int i=0; i < inputContent.size(); i++){
 			OCSS::Encrypt(inputContent[i], keys);
 			out << inputContent[i] << endl;
 		}
@@ -227,7 +236,7 @@ int main(int argc, char* argv[]){
 	//threadtest(version);
 #ifdef WIN32
 	ios_base::sync_with_stdio(false);
-	string new_data = "";
+	std::string new_data = "";
 	version_show();
 	cout<<" Data:\n";
 	getline(cin,data);
@@ -257,13 +266,15 @@ int main(int argc, char* argv[]){
 	cin>>Select;
 
 	if(Select == "E"){
-		OCSS::Encrypt(data, keys);
-		printf("\nResult:\n");
-		cout<<data<<endl;
+		const unsigned char * constStr = reinterpret_cast<const unsigned char *> (data.c_str());
+		data = base64_encode(constStr,
+					data.length());
+		cout<<"\nResult:\n"<<OCSS::SafetyEncrypt(data, keys)<<endl;
 	}
 	else{
 		reverse(keys.begin(), keys.end());
 		OCSS::Decrypt(data, keys);
+		data = base64_decode(data);
 		printf("\nResult:\n");
 		cout<<data<<endl;
 	}

@@ -1,5 +1,6 @@
 #include "OCSS.hpp"
 #include "del.hpp"
+#include "base64.h"
 #ifndef EXCEPTION
 #define EXCEPTION
 
@@ -49,8 +50,16 @@ public:
 		return _message;
 	}
 };
-string Char_List = "\t0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ `-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?";
+#ifndef SEOHCS
+std::string Char_List = "\t0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ `-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?";
 const int last_key_init = 96;
+#endif
+#ifdef SEOHCS
+std::string Char_List = "#*ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+			"abcdefghijklmnopqrstuvwxyz"
+			"0123456789+/=";
+const int last_key_init = 67;
+#endif
 std::string OCSS::SafetyEncrypt(std::string Data,vector<char> Key)
 {
 	vector<char> backup_key = Key;
