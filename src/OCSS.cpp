@@ -1,6 +1,9 @@
 #include "OCSS.hpp"
 #include "del.hpp"
 #include "base64.h"
+#ifndef SEOHCS
+#define SEOHCS
+#endif
 #ifndef EXCEPTION
 #define EXCEPTION
 
