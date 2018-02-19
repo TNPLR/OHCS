@@ -22,14 +22,17 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
+#include "base64.h"
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
 #endif
 #pragma once
 #include <cstdio>
+/*
 char file = 0;
 char R[100];
 char *ReadFile = R;
+*/
 #include <cstdlib>
 #include "del.hpp"
 #include <fstream>
@@ -62,17 +65,17 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 	for (char &x : key) {
 		keys.push_back(x);
 	}
-	ifstream fin;
+	std::ifstream fin;
 	fin.open(input_filename);
 	if(!fin) {
 		cerr << "Error:Can not input this file.\n";
 		exit(-1);
 	}
 	std::string inputStr;
-	std::vector<string> inputContent;
+	std::vector<std::string> inputContent;
 	if(!mode){			
 		while(getline(fin, inputStr)){
-			inputContent.push_back("#" + inputStr);
+			inputContent.push_back(inputStr);
 		}
 	}
 	else{		
@@ -81,24 +84,30 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 		}
 	}
 #ifdef DEBUG
-	for(int i=0; i < inputContent.size();i++){
+	for(unsigned int i=0; i < inputContent.size();i++){
 		cout<<inputContent[i]<<endl;
 	}
 #endif
 	fin.close();
-	ofstream out(output_filename);
+	std::ofstream out(output_filename);
+	std::string tmp_wstring;
 	if(mode){
 		reverse(keys.begin(), keys.end());
-		for(int i=0; i < inputContent.size(); i++){
+		for(unsigned int i=0; i < inputContent.size(); i++){
 			OCSS::Decrypt(inputContent[i], keys);
-			inputContent[i].erase(0,1);
-			out << inputContent[i] << endl;
+			//inputContent[i].erase(0,1);
+			tmp_wstring = base64_decode(inputContent[i]);
+			cout << tmp_wstring << endl;
+			out << tmp_wstring << endl;
 		}
 	}
 #ifdef SEOHCS
 	else{
 		std::string NewData;
-		for(int i=0; i < inputContent.size(); i++){
+		for(unsigned int i=0; i < inputContent.size(); i++){
+			const unsigned char * constStr = reinterpret_cast<const unsigned char *> (inputContent[i].c_str());
+			inputContent[i] = base64_encode(constStr,
+							sizeof(constStr) / sizeof(unsigned char));
 			std::cout << "Line:"<< i+1<<endl;
 			NewData = OCSS::SafetyEncrypt(inputContent[i], keys);
 			out << NewData << endl;
@@ -107,7 +116,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 #endif
 #ifndef SEOHCS
 	else{
-		for(int i=0; i < inputContent.size(); i++){
+		for(unsigned int i=0; i < inputContent.size(); i++){
 			OCSS::Encrypt(inputContent[i], keys);
 			out << inputContent[i] << endl;
 		}

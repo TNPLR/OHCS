@@ -102,7 +102,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_ohcs_OBJECTS = main.$(OBJEXT) OCSS.$(OBJEXT) del.$(OBJEXT) \
 	BigIntegerAlgorithms.$(OBJEXT) BigUnsigned.$(OBJEXT) \
 	BigInteger.$(OBJEXT) BigUnsignedInABase.$(OBJEXT) \
-	BigIntegerUtils.$(OBJEXT)
+	BigIntegerUtils.$(OBJEXT) base64.$(OBJEXT)
 ohcs_OBJECTS = $(am_ohcs_OBJECTS)
 ohcs_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -265,8 +265,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CXXFLAGS = -Wall -DUNIX -O3 -std=gnu++14 -I${top_srcdir}/include -flto
-ohcs_SOURCES = main.cpp OCSS.cpp del.cpp BigIntegerAlgorithms.cc BigUnsigned.cc BigInteger.cc BigUnsignedInABase.cc BigIntegerUtils.cc BigIntegerAlgorithms.hh  BigIntegerLibrary.hh  BigUnsigned.hh del.hpp OCSS.hpp BigInteger.hh BigIntegerUtils.hh BigUnsignedInABase.hh  NumberlikeArray.hh
+AM_CXXFLAGS = -Wall -DUNIX -O3 -std=gnu++14 -I${top_srcdir}/include -flto -DSEOHCS -DDEBUG
+ohcs_SOURCES = main.cpp OCSS.cpp del.cpp BigIntegerAlgorithms.cc BigUnsigned.cc BigInteger.cc BigUnsignedInABase.cc BigIntegerUtils.cc BigIntegerAlgorithms.hh  BigIntegerLibrary.hh  BigUnsigned.hh del.hpp OCSS.hpp BigInteger.hh BigIntegerUtils.hh BigUnsignedInABase.hh  NumberlikeArray.hh	base64.cpp base64.h
 all: all-am
 
 .SUFFIXES:
@@ -359,6 +359,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BigUnsigned.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BigUnsignedInABase.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OCSS.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/del.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 
