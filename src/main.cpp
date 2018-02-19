@@ -22,6 +22,9 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
+#ifndef SEOHCS
+#define SEOHCS
+#endif
 #include "base64.h"
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
@@ -232,7 +235,7 @@ int main(int argc, char* argv[]){
 	//threadtest(version);
 #ifdef WIN32
 	ios_base::sync_with_stdio(false);
-	string new_data = "";
+	std::string new_data = "";
 	version_show();
 	cout<<" Data:\n";
 	getline(cin,data);
@@ -262,13 +265,15 @@ int main(int argc, char* argv[]){
 	cin>>Select;
 
 	if(Select == "E"){
-		OCSS::Encrypt(data, keys);
-		printf("\nResult:\n");
-		cout<<data<<endl;
+		const unsigned char * constStr = reinterpret_cast<const unsigned char *> (data.c_str());
+		data = base64_encode(constStr,
+					data.length());
+		cout<<"\nResult:\n"<<OCSS::SafetyEncrypt(data, keys)<<endl;
 	}
 	else{
 		reverse(keys.begin(), keys.end());
 		OCSS::Decrypt(data, keys);
+		data = base64_decode(data);
 		printf("\nResult:\n");
 		cout<<data<<endl;
 	}
