@@ -92,7 +92,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 		reverse(keys.begin(), keys.end());
 		for(unsigned int i=0; i < inputContent.size(); i++){
 			OCSS::Decrypt(inputContent[i], keys);
-			//inputContent[i].erase(0,1);
+			inputContent[i].erase(0,3);
 			tmp_wstring = base64_decode(inputContent[i]);
 			cout << tmp_wstring << endl;
 			out << tmp_wstring << endl;
@@ -108,6 +108,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 #endif
 			inputContent[i] = base64_encode(constStr,
 							inputContent[i].length());
+			inputContent[i].insert(0,"aaa");
 			std::cout << "Line:"<< i+1<<endl;
 			NewData = OCSS::SafetyEncrypt(inputContent[i], keys);
 			out << NewData << endl;
