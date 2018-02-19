@@ -44,8 +44,9 @@ char *ReadFile = R;
 #ifdef UNIX
 #include <getopt.h>
 #endif
-#ifdef UNIX
 const std::string version = "2.0.0";
+#ifdef UNIX
+
 const char* program_name;
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
 void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));

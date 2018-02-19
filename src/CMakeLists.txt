@@ -12,5 +12,3 @@ ADD_EXECUTABLE (
 	base64.cpp
 
 )
-install (TARGET ohcs
-	RUNTIME DESTINATION bin)
