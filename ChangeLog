@@ -1,8 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-
+## [2.0.1] - 2018-02-19
+### IMPORTANT
+# This version is VERY DIFFERENT FROM 1.x
+# It can support UTF-8
 ## [1.5] - 2018-02-16
 ### Added
 #	-Add GNU Make support
