@@ -51,7 +51,7 @@ char *ReadFile = R;
 #include <ncurses.h>
 #include <getopt.h>
 #endif
-const char *  version = "2.1.0";
+const char *  version = "2.1.1";
 #ifdef UNIX
 #include <thread>
 

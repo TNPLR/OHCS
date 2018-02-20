@@ -22,8 +22,8 @@
 OHCS can encrypt and decrypt a string by changing the carry of a string. OHCS randomly insert lots of chars
 into a string. Therefore, OHCS can encrypt the same string to different string.
 # Notice
-The compiler needs to support c++14 standard
+The compiler needs to support c++11 standard
 # INSTALL
-Please read INSTALL before installing the program.
+Please read INSTALL before installing the program. Please use visual studio C++ compiler or g++ compiler
 # Bugs
 No known bugs

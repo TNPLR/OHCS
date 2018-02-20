@@ -11,7 +11,9 @@
 #include <sstream>
 #include "BigIntegerLibrary.hh"
 #include <cstring>
+#ifdef OpenMP
 #include "omp.h"
+#endif
 #ifndef EXCEPTION
 #define EXCEPTION
 
