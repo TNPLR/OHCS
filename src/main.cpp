@@ -22,6 +22,9 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
+#ifdef OpenMP
+#include "omp.h"
+#endif
 #ifndef SEOHCS
 #define SEOHCS
 #endif
@@ -29,7 +32,6 @@ Made by Hsiaosvideo
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
 #endif
-#pragma once
 #include <cstdio>
 /*
 char file = 0;
@@ -46,6 +48,7 @@ char *ReadFile = R;
 #endif
 const std::string version = "2.0.0";
 #ifdef UNIX
+#include <thread>
 
 const char* program_name;
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
@@ -63,6 +66,38 @@ void print_usage(FILE* stream, int exit_code)
 		"\t-v\t--version\t\tShow the Version.\n");
 	exit(exit_code);
 }
+std::vector<std::string> read_file(std::ifstream& fin)
+{
+	
+	std::string inputStr;
+	std::vector<std::string> inputContent;	
+	while(getline(fin, inputStr)){
+		inputContent.push_back(inputStr);
+	}
+#ifdef DEBUG
+	for(unsigned int i=0; i < inputContent.size();i++){
+		cout<<inputContent[i]<<endl;	
+	}
+#endif
+	fin.close();
+	return inputContent;
+}
+void write_file(std::string output_filename, std::vector<std::string> inputContent)
+{
+	auto cout_data = [=](std::vector<std::string> inputContent)->void
+			{
+				for(unsigned int i=0; i < inputContent.size(); i++){
+					std::cout << inputContent[i] << endl;
+				}
+			};
+	std::thread mThread(cout_data,inputContent);
+	std::ofstream out(output_filename);		
+	for(unsigned int i=0; i < inputContent.size(); i++){
+		out << inputContent[i] << endl;
+	}
+	out.close();
+	mThread.join();
+}
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename)
 {
 	std::vector<char> keys;
@@ -75,32 +110,19 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 		cerr << "Error:Can not input this file.\n";
 		exit(-1);
 	}
-	std::string inputStr;
-	std::vector<std::string> inputContent;	
-	while(getline(fin, inputStr)){
-		inputContent.push_back(inputStr);
-	}
-#ifdef DEBUG
-	for(unsigned int i=0; i < inputContent.size();i++){
-		cout<<inputContent[i]<<endl;	
-	}
-#endif
-	fin.close();
-	std::ofstream out(output_filename);
-	std::string tmp_wstring;
+	std::vector<std::string>&& inputContent = read_file(fin);
 	if(mode){
 		reverse(keys.begin(), keys.end());
+		#pragma omp parallel for
 		for(unsigned int i=0; i < inputContent.size(); i++){
 			OCSS::Decrypt(inputContent[i], keys);
 			inputContent[i].erase(0,3);
-			tmp_wstring = base64_decode(inputContent[i]);
-			cout << tmp_wstring << endl;
-			out << tmp_wstring << endl;
+			inputContent[i] = base64_decode(inputContent[i]);
 		}
 	}
 #ifdef SEOHCS
 	else{
-		std::string NewData;
+		#pragma omp parallel for
 		for(unsigned int i=0; i < inputContent.size(); i++){
 			const unsigned char * constStr = reinterpret_cast<const unsigned char *> (inputContent[i].c_str());
 #ifdef DEBUG
@@ -110,8 +132,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 							inputContent[i].length());
 			inputContent[i].insert(0,"aaa");
 			std::cout << "Line:"<< i+1<<endl;
-			NewData = OCSS::SafetyEncrypt(inputContent[i], keys);
-			out << NewData << endl;
+			inputContent[i] = OCSS::SafetyEncrypt(inputContent[i], keys);
 		}
 	}
 #endif
@@ -123,7 +144,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 		}
 	}
 #endif
-	out.close();
+	write_file(output_filename, inputContent);	
 	exit(0);
 }
 #endif
@@ -270,11 +291,13 @@ int main(int argc, char* argv[]){
 		const unsigned char * constStr = reinterpret_cast<const unsigned char *> (data.c_str());
 		data = base64_encode(constStr,
 					data.length());
+		data.insert(0,"aaa");
 		cout<<"\nResult:\n"<<OCSS::SafetyEncrypt(data, keys)<<endl;
 	}
 	else{
 		reverse(keys.begin(), keys.end());
 		OCSS::Decrypt(data, keys);
+		data.erase(0,3);
 		data = base64_decode(data);
 		printf("\nResult:\n");
 		cout<<data<<endl;
