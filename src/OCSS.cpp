@@ -1,9 +1,17 @@
 #include "OCSS.hpp"
 #include "del.hpp"
 #include "base64.h"
-#ifndef SEOHCS
-#define SEOHCS
-#endif
+#include <cstdlib>
+#include <vector>
+#include <ctime>
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <sstream>
+#include "BigIntegerLibrary.hh"
+#include <cstring>
+#include "omp.h"
 #ifndef EXCEPTION
 #define EXCEPTION
 
@@ -53,28 +61,22 @@ public:
 		return _message;
 	}
 };
-#ifndef SEOHCS
-std::string Char_List = "\t0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ `-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?";
-const int last_key_init = 96;
-#endif
-#ifdef SEOHCS
 std::string Char_List = "#*ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 			"abcdefghijklmnopqrstuvwxyz"
-			"0123456789+/=";
-const int last_key_init = 67;
-#endif
-std::string OCSS::SafetyEncrypt(std::string Data,vector<char> Key)
+			"0123456789+/=!";
+const int last_key_init = 68;
+#ifdef SEOHCS
+std::string OCSS::SafetyEncrypt(std::string Data,std::vector<char> Key)
 {
-	vector<char> backup_key = Key;
+	std::vector<char> backup_key = Key;
 	std::string backup_data = Data;
 	std::string encrypt_data;
 	while(true){
-		Encrypt(Data,Key);
-		encrypt_data = Data;
+		encrypt_data = Encrypt(Data,Key);
 		if(Key != backup_key){
 			throw KeyChangeException("Error:KeyChangeException");
-		}	
-		reverse(Key.begin(), Key.end());
+		}
+		std::reverse(Key.begin(), Key.end());
 		Decrypt(Data,Key);
 		if(Data == backup_data){
 			return encrypt_data;
@@ -87,20 +89,21 @@ std::string OCSS::SafetyEncrypt(std::string Data,vector<char> Key)
 			Data = backup_data;
 			continue;
 		}
-	}	
-	// It won't be here
-	return Data;
+	}
 }
-void OCSS::Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key)
+#endif	
+std::string OCSS::Encrypt(std::string Data,std::vector<char> Key)
 {
 	int last_key = last_key_init;
 #ifdef DEBUG
-	printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]);cout<<Data<<'\n';
+	printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]);std::cout<<Data<<'\n';
 #endif
 	for(char plugin_key : Key)
         {
 		int plugin_value = 0;
-                //#pragma omp parallel for
+                #ifdef OpenMP
+		#pragma omp parallel for
+		#endif
                 for (unsigned int values = 0; values < Char_List.length() ; ++values)
                 {
                         if (Char_List[values] == plugin_key)
@@ -110,10 +113,11 @@ void OCSS::Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key
                 }
                 ToBase(Data, last_key, plugin_value);
 #ifdef DEBUG
-                printf("Base %d-\"%c\"||", plugin_value, Char_List[plugin_value - 1]);cout<<Data<<'\n';
+                printf("Base %d-\"%c\"||", plugin_value, Char_List[plugin_value - 1]);
+		std::cout<<Data<<'\n';
 #endif
 	    	unsigned int plugin_count = rand()%Data.length()/3+1;
-                vector<unsigned int> plugin_location;
+                std::vector<unsigned int> plugin_location;
                 while (plugin_count > 0)
                 {
                         plugin_location.push_back(rand()%Data.length());
@@ -122,8 +126,7 @@ void OCSS::Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key
                 //#pragma omp parallel for
                 for(unsigned int& this_location : plugin_location)
                 {
-                        string new_data = "";
-                        //#pragma omp parallel for
+                        std::string new_data = "";
                         for (unsigned int x = 0; x < Data.length(); ++x)
                         {
                                 if (x == this_location)
@@ -136,55 +139,56 @@ void OCSS::Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key
                 }
                 last_key = (int)(plugin_value + 1);
 #ifdef DEBUG
-                printf("Base %d-\"%c\"||", plugin_value + 1, Char_List[plugin_value]); cout<<Data<<'\n';//Debug
+                printf("Base %d-\"%c\"||", plugin_value + 1, Char_List[plugin_value]); std::cout<<Data<<'\n';//Debug
 #endif
 	}
         ToBase(Data, last_key, last_key_init);
 #ifdef DEBUG
-        printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]); cout<<Data<<'\n';
+        printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]); std::cout<<Data<<'\n';
 #endif
-	return;
+	return Data;
 }
-void OCSS::Decrypt(string& Data,vector<char>& Key)
+void OCSS::Decrypt(std::string& Data,std::vector<char>& Key)
 {
 	int last_key = last_key_init;
 #ifdef DEBUG
-        printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]);cout<<Data<<'\n';
+        printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]);std::cout<<Data<<'\n';
 #endif
         for(char &remove_key : Key)
         {
                 int remove_value = 0;
-                //#pragma omp parallel for
+                #ifdef OpenMP
+		#pragma omp parallel for
+		#endif
                 for (unsigned int values = 0; values < Char_List.length(); ++values)
                 {
                         if (Char_List[values] == remove_key)
                         {
                                 remove_value = values;
-                                break;
                         }
                 }
                 ToBase(Data, last_key, (int)(remove_value + 1));
 #ifdef DEBUG
-                printf("Base %d-\"%c\"||", remove_value + 1, Char_List[remove_value]);cout<<Data<<'\n';
+                printf("Base %d-\"%c\"||", remove_value + 1, Char_List[remove_value]);std::cout<<Data<<'\n';
 #endif
 #ifdef UNIX
-				del(Data, remove_key);
+				dell::del(Data, remove_key);
 #endif
 #ifdef WIN32
 				char tmpRemove[] = {remove_key};
 				dell::remove(tmpRemove,Data);
 #endif // WIN32
 #ifdef DEBUG
-                printf("Base %d-\"%c\"||", remove_value, Char_List[remove_value - 1]);cout<<Data<<'\n';
+                printf("Base %d-\"%c\"||", remove_value, Char_List[remove_value - 1]);std::cout<<Data<<'\n';
 #endif
                 last_key = remove_value;
         }
         ToBase(Data, last_key, last_key_init);
 #ifdef DEBUG
-	printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]); cout<<Data<<'\n';
+	printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]); std::cout<<Data<<'\n';
 #endif
 }
-void OCSS::ToBase(string& Data,int Original_Base,int New_Base)
+void OCSS::ToBase(std::string& Data,int Original_Base,int New_Base)
 {
         if (Original_Base == 0 || Original_Base == 1 || New_Base == 0 || New_Base == 1 || Data == "")
         {
@@ -196,7 +200,6 @@ void OCSS::ToBase(string& Data,int Original_Base,int New_Base)
         {
                 total_value *= Original_Base;
                 unsigned int values = 0;
-                //#pragma omp parallel for
                 for (; values < Char_List.length(); ++values)
                 {
                         if (Char_List[values] == data)
@@ -206,14 +209,13 @@ void OCSS::ToBase(string& Data,int Original_Base,int New_Base)
                 }
                 total_value += values;
         }
-        string return_value = "";
+        std::string return_value = "";
         while (total_value > 0) 
         {
                 int left = (total_value % New_Base).toInt();
                 return_value = Char_List[left] + return_value;
                 total_value = (total_value - left) / New_Base;
         }
-        return_value = return_value.erase(return_value.find_last_not_of('0')+1);
         Data = return_value;
         return;
 }
@@ -233,10 +235,10 @@ int OCSS::Char_Value(char chars)
 }
 bool OCSS::check()
 {
-        string x = "ASC";
-        string z = x;
-        ToBase(x, 95, 23);
-        ToBase(x, 23, 95);
+        std::string x = "ASC";
+        std::string z = x;
+        OCSS::ToBase(x, 95, 23);
+        OCSS::ToBase(x, 23, 95);
         if (x == z)
         {
                 return true;

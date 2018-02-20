@@ -1,22 +1,37 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-
-## [Unreleased]
-
+## [2.1.0]
+### Added
+#	+ OpenMP support
+#	+ Unix TUI (ncurses) support
+### Changed
+#	- Safety Encrypt OHCS changed to OPTIONAL
+#	- UTF-8 Encrypt fail bug fixed
+## [2.0.1] - 2018-02-19
+### Changed
+#	- UTF-8 null line bug fixed
+## [2.0.0] - 2018-02-19
+### Added
+#	+ UTF-8 support
+### Change
+#	- CAN NOT ENCRYPT/DECRYPT 1.x DATA
+## [1.6] - 2018-02-17
+### Added
+#	+ Safety Encrypt OHCS
 ## [1.5] - 2018-02-16
 ### Added
-#	-Add GNU Make support
-#	-Add CMake support
-#	-Add Visual Studio C++ support
-#	-Add GNU C++ Compiler support
-#	-Add Clang C++ Compiler support
-#	-Add new debug option
-#	-Features on UNIX
-#		-Add GNU style Option support (long option)
-#		-Add POSIX style Option support (short option)
-#		-Add Read File support
-#	-Features on Windows
-#		-Command line interface support
+#	+ GNU Make support
+#	+ CMake support
+#	+ Visual Studio C++ support
+#	+ GNU C++ Compiler support
+#	+ Clang C++ Compiler support
+#	+ new debug option
+#	+ Features on UNIX
+#		+ GNU style Option support (long option)
+#		+ POSIX style Option support (short option)
+#		+ Read File support
+#	+ Features on Windows
+#		+ Command line interface support
 ### Changed
 
 ### Removed
