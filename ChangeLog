@@ -1,5 +1,6 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+
 ## [2.1.0]
 ### Added
 #	+ OpenMP support
@@ -18,6 +19,7 @@ All notable changes to this project will be documented in this file.
 ## [1.6] - 2018-02-17
 ### Added
 #	+ Safety Encrypt OHCS
+
 ## [1.5] - 2018-02-16
 ### Added
 #	+ GNU Make support
