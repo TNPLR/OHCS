@@ -3,7 +3,7 @@
 #include <string.h>
 using namespace std;
 #ifdef UNIX
-void del(char *src, char remove_key)
+void dell::del(char *src, char remove_key)
 {
         char * fp = src;
         while (*src) {
@@ -15,7 +15,7 @@ void del(char *src, char remove_key)
         }
         *fp = '\0' ;
 }
-void del(string &str, char remove_key)
+void dell::del(string &str, char remove_key)
 {
         char tmp[str.size()+1];
         memcpy(&tmp, str.c_str(), str.size() + 1);

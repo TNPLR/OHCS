@@ -22,30 +22,38 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
-#ifndef SEOHCS
-#define SEOHCS
+#include <vector>
+#include <ctime>
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <sstream>
+#include "BigIntegerLibrary.hh"
+#include <cstring>
+#ifdef OpenMP
+#include "omp.h"
 #endif
 #include "base64.h"
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
 #endif
-#pragma once
-#include <cstdio>
 /*
 char file = 0;
 char R[100];
 char *ReadFile = R;
 */
-#include <cstdlib>
 #include "del.hpp"
 #include <fstream>
 #include "OCSS.hpp"
 //#include <thread>
 #ifdef UNIX
+#include <ncurses.h>
 #include <getopt.h>
 #endif
-const std::string version = "2.0.0";
+const char *  version = "2.1.1";
 #ifdef UNIX
+#include <thread>
 
 const char* program_name;
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
@@ -60,8 +68,45 @@ void print_usage(FILE* stream, int exit_code)
 		"\t-D\t--data [input-data]\tImport Data.\n"
 		"\t-i\t--input [input-file]\tSelect input file.\n"
 		"\t-k\t--key [key]\t\tImport the key.\n"
-		"\t-v\t--version\t\tShow the Version.\n");
+		"\t-v\t--version\t\tShow the Version.\n"
+		"\t-t\t--tui\t\t\tTUI mode\n");
 	exit(exit_code);
+}
+std::vector<std::string> read_file(std::ifstream& fin)
+{
+	
+	std::string inputStr;
+	std::vector<std::string> inputContent;	
+	while(getline(fin, inputStr)){
+		inputContent.push_back(inputStr);
+	}
+#ifdef DEBUG
+	for(unsigned int i=0; i < inputContent.size();i++){
+		std::cout<<inputContent[i]<<std::endl;	
+	}
+#endif
+	fin.close();
+	return inputContent;
+}
+inline void write_file(std::string output_filename, std::vector<std::string> inputContent)
+{
+#ifdef DEBUG
+	auto cout_data = [=](std::vector<std::string> inputContent)->void
+			{
+				for(unsigned int i=0; i < inputContent.size(); i++){
+					std::cout << inputContent[i] << std::endl;
+				}
+			};
+	std::thread mThread(cout_data,inputContent);
+#endif
+	std::ofstream out(output_filename);		
+	for(unsigned int i=0; i < inputContent.size(); i++){
+		out << inputContent[i] << std::endl;
+	}
+	out.close();
+#ifdef DEBUG
+	mThread.join();
+#endif
 }
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename)
 {
@@ -72,83 +117,127 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 	std::ifstream fin;
 	fin.open(input_filename);
 	if(!fin) {
-		cerr << "Error:Can not input this file.\n";
+		std::cerr << "Error:Can not input this file.\n";
 		exit(-1);
 	}
-	std::string inputStr;
-	std::vector<std::string> inputContent;	
-	while(getline(fin, inputStr)){
-		inputContent.push_back(inputStr);
-	}
-#ifdef DEBUG
-	for(unsigned int i=0; i < inputContent.size();i++){
-		cout<<inputContent[i]<<endl;	
-	}
-#endif
-	fin.close();
-	std::ofstream out(output_filename);
-	std::string tmp_wstring;
+	std::vector<std::string>&& inputContent = read_file(fin);
 	if(mode){
-		reverse(keys.begin(), keys.end());
+		std::reverse(keys.begin(), keys.end());
+#ifdef OpenMP
+		#pragma omp parallel for num_threads(4)
+#endif
 		for(unsigned int i=0; i < inputContent.size(); i++){
 			OCSS::Decrypt(inputContent[i], keys);
 			inputContent[i].erase(0,3);
-			tmp_wstring = base64_decode(inputContent[i]);
-			cout << tmp_wstring << endl;
-			out << tmp_wstring << endl;
+			inputContent[i] = base64_decode(inputContent[i]);
 		}
 	}
-#ifdef SEOHCS
 	else{
-		std::string NewData;
+#ifdef OpenMP
+		#pragma omp parallel for num_threads(4)
+#endif	
 		for(unsigned int i=0; i < inputContent.size(); i++){
 			const unsigned char * constStr = reinterpret_cast<const unsigned char *> (inputContent[i].c_str());
 #ifdef DEBUG
-			cout << constStr << endl;
+			std::cout << constStr << std::endl;
 #endif
 			inputContent[i] = base64_encode(constStr,
 							inputContent[i].length());
 			inputContent[i].insert(0,"aaa");
-			std::cout << "Line:"<< i+1<<endl;
-			NewData = OCSS::SafetyEncrypt(inputContent[i], keys);
-			out << NewData << endl;
+			std::cout << "Line:"<< i+1<<std::endl;
+			inputContent[i] = OCSS::Encrypt(inputContent[i], keys);
 		}
 	}
-#endif
-#ifndef SEOHCS
-	else{
-		for(unsigned int i=0; i < inputContent.size(); i++){
-			OCSS::Encrypt(inputContent[i], keys);
-			out << inputContent[i] << endl;
-		}
-	}
-#endif
-	out.close();
+	write_file(output_filename, inputContent);
 	exit(0);
 }
 #endif
-using namespace std;
 void version_show()
 {
 #ifdef WIN32
-	cout<<"OH Crytoservice System on Windows\n Vesion "<<version<<'\n';
+	std::cout<<"OH Crytoservice System on Windows\n Vesion "<<version<<'\n';
 	return;
 #endif
 #ifdef UNIX
-	cout<<"OH Crytoservice System on Unix\nVesion "<<version<<'\n';
+	std::cout<<"OH Crytoservice System on Unix\nVesion "<<version<<'\n';
 #endif
 #ifdef Unknown
-	cout<<"OH Crytoservice Systems\n Vesion "<<version<<'\n';
+	std::cout<<"OH Crytoservice Systems\n Vesion "<<version<<'\n';
 #endif
 	exit(0);
 }
+#ifdef UNIX
+void tui_main()
+{
+	char* data = new char[1024];
+	char* key = new char[256];
+	initscr();
+	printw("OH Crytoservice System on Unix\nVesion %s\n", version);
+	refresh();
+	printw("Data: ");
+	refresh();
+	getnstr( data, 10231 );
+	printw("Key: ");
+	getnstr( key, 255);	
+	std::vector<char> keys;
+	std::string Key = key;
+	for (char x : Key) {
+		keys.push_back(x);
+	}
+	std::string Select;
+	printw("Encrypt or Decrypt");
+	refresh();
+	auto ch = getch();
+	switch(ch){
+		case 'D':
+			Select = "D";
+			printw("Decrypt mode\n");
+			break;
+		case 'E':
+			Select = "E";
+			printw("Encrypt mode\n");
+			break;
+		default:
+			Select = "E";
+			printw("Using defaault: Encrypt mode\n");
+	}
+	refresh();
+	if(Select == "E"){
+		std::string Data = data;
+		const unsigned char * constStr = reinterpret_cast<const unsigned char *> (data);
+		
+		Data = base64_encode(constStr,
+					Data.length());
+		Data.insert(0,"aaa");
+		Data = OCSS::Encrypt(Data,keys);
+		data = &Data[0];
+		printw("%s\n", data);
+		refresh();
+	}
+	else{
+		std::string Data = data;
+		std::reverse(keys.begin(), keys.end());
+		OCSS::Decrypt(Data, keys);
+		Data.erase(0,3);
+		Data = base64_decode(Data);
+		data = &Data[0];
+		printw("%s\n", data);
+		refresh();
+	}
+	delete(data);
+	delete(key);
+	getch();
+	endwin();
+	exit(0);
+}
+#endif
 int main(int argc, char* argv[]){
-	string key;
-	string data;
+	std::string key;
+	std::string data;
 	srand(time(NULL));
 #ifdef UNIX
 	int next_option;
-	const char* const short_options = "o:vhedi:k:";
+	const char* const short_options = "o:vhedi:k:t";
 	const struct option long_options[] = {
 		{"help",0,NULL,'h'},
 		{"encrypt",0,NULL,'e'},
@@ -158,10 +247,11 @@ int main(int argc, char* argv[]){
 		{"key",1,NULL,'k'},
 		{"version",0,NULL,'v'},
 		{"output",1,NULL,'o'},
+		{"tui",0,NULL,'t'},
 		{NULL,0,NULL,0}
 	};
-	string input_filename = "";
-	string output_filename = "";
+	std::string input_filename = "";
+	std::string output_filename = "";
 	int mode = 0; // Encrypt:0, Decrypt 1
 	program_name = argv[0];
 	do {
@@ -195,6 +285,8 @@ int main(int argc, char* argv[]){
 			case 'o':
 				output_filename = optarg;
 				break;
+			case 't':
+				tui_main();
 			case '?': /* The user specified an invalid option. */
 				print_usage (stderr, 1);
 			case -1:
@@ -205,7 +297,7 @@ int main(int argc, char* argv[]){
 	}while(next_option != -1);
 	if(!(input_filename.compare("")) || !(output_filename.compare("")))
 	{
-		cerr<<"ERROR: Input file or output file undefine."<<endl;
+		std::cerr<<"ERROR: Input file or output file undefine."<<std::endl;
 		exit(0);
 	}
 	file_in_cs(mode,input_filename,key,output_filename);
@@ -239,12 +331,12 @@ int main(int argc, char* argv[]){
 	ios_base::sync_with_stdio(false);
 	std::string new_data = "";
 	version_show();
-	cout<<" Data:\n";
+	std::cout<<" Data:\n";
 	getline(cin,data);
-	cout<<" Key:"<<'\n';
+	std::cout<<" Key:"<<'\n';
 	getline(cin,key);
 
-	vector<char> keys;
+	std::vector<char> keys;
 	for (char &x : key) {
 		keys.push_back(x);
 	}
@@ -262,22 +354,24 @@ int main(int argc, char* argv[]){
 	*/
 #endif
 #ifdef WIN32
-	string Select;
-	cout<<"[E]ncrypt or [D]ecrypt?\n";
-	cin>>Select;
+	std::string Select;
+	std::cout<<"[E]ncrypt or [D]ecrypt?\n";
+	std::cin>>Select;
 
 	if(Select == "E"){
 		const unsigned char * constStr = reinterpret_cast<const unsigned char *> (data.c_str());
 		data = base64_encode(constStr,
 					data.length());
-		cout<<"\nResult:\n"<<OCSS::SafetyEncrypt(data, keys)<<endl;
+		data.insert(0,"aaa");
+		std::cout<<"\nResult:\n"<<OCSS::Encrypt(data, keys)<<std::endl;
 	}
 	else{
-		reverse(keys.begin(), keys.end());
+		std::reverse(keys.begin(), keys.end());
 		OCSS::Decrypt(data, keys);
+		data.erase(0,3);
 		data = base64_decode(data);
 		printf("\nResult:\n");
-		cout<<data<<endl;
+		std::cout<<data<<std::endl;
 	}
 	system("pause");
 #endif

@@ -1,12 +1,11 @@
 #include <string>
-using namespace std;
+namespace dell{
 #ifdef UNIX
-void del(string &str, char remove_key);
-void del(char *src, char remove_key);
+	void del(std::string &str, char remove_key);
+	void del(char *src, char remove_key);
 #endif
 #ifdef WIN32
-namespace dell {
-	void remove(char* charToRemove, string &str);
-};
+	void remove(char* charToRemove, std::string &str);
 
 #endif
+};

@@ -1,28 +1,17 @@
 #ifndef OCSS_H
 #define OCSS_H
-#include <stdlib.h>
-#include <vector>
-#include <time.h>
-#include <stdio.h>
-#include <iostream>
-#include <algorithm>
 #include <string>
-#include <sstream>
-#include "BigIntegerLibrary.hh"
+#include <vector>
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
-# define __restrict__ /*NOTHING*/
 #endif
-#ifdef WIN32
-#include <omp.h>
-#endif
-#include <string.h>
-using namespace std;
 namespace OCSS{
-	std::string SafetyEncrypt(std::string Data, vector<char> Key);
-	void Encrypt(std::string& __restrict__ Data,vector<char>& __restrict__ Key);
-	void Decrypt(string& Data,vector<char>& Key);
-	void ToBase(string& Data,int Original_Base,int New_Base);
+#ifdef SEOHCS
+	std::string SafetyEncrypt(std::string Data, std::vector<char> Key);
+#endif
+	std::string Encrypt(std::string Data,std::vector<char> Key);
+	void Decrypt(std::string& Data,std::vector<char>& Key);
+	void ToBase(std::string& Data,int Original_Base,int New_Base);
 #ifdef DEBUG
 	int Char_Value(char chars);
 	bool check();
