@@ -1,6 +1,6 @@
 # OHCS
 # OH Cryptography System
-# Copyright (C) 2017 Ollolol && TNPLR
+# Copyright (C) 2018 Ollolol && TNPLR
 ---------------------------------------------------------------------------------------------------------------
     This file is part of OH Cryptography System.
 
