@@ -1,4 +1,5 @@
 INCLUDE_DIRECTORIES (${OHCS_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES (/usr/include/boost)
 ADD_EXECUTABLE (
 	ohcs
 	main.cpp

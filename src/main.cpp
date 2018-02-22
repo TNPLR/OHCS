@@ -31,10 +31,13 @@ Made by Hsiaosvideo
 #include <sstream>
 #include "BigIntegerLibrary.hh"
 #include <cstring>
+#ifndef OpenMP
+#define OpenMP
+#endif
 #ifdef OpenMP
 #include "omp.h"
 #endif
-#include "base64.h"
+#include "base64.hpp"
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
 #endif
@@ -55,6 +58,9 @@ const char *  version = "2.1.1";
 #ifdef UNIX
 #include <thread>
 
+using Base64::Base64Encode;
+using Base64::Base64Decode;
+using Base64::RmZero;
 const char* program_name;
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
 void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));
@@ -129,7 +135,11 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 		for(unsigned int i=0; i < inputContent.size(); i++){
 			OCSS::Decrypt(inputContent[i], keys);
 			inputContent[i].erase(0,3);
-			inputContent[i] = base64_decode(inputContent[i]);
+			inputContent[i] = Base64::Base64Decode(inputContent[i]);
+			std::cout << "Line:"<< i+1<<std::endl;
+			if(inputContent[i] != ""){
+				inputContent[i] = Base64::RmZero(inputContent[i]);
+			}
 		}
 	}
 	else{
@@ -137,12 +147,10 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 		#pragma omp parallel for num_threads(4)
 #endif	
 		for(unsigned int i=0; i < inputContent.size(); i++){
-			const unsigned char * constStr = reinterpret_cast<const unsigned char *> (inputContent[i].c_str());
 #ifdef DEBUG
-			std::cout << constStr << std::endl;
+			std::cout << inputContent[i] << std::endl;
 #endif
-			inputContent[i] = base64_encode(constStr,
-							inputContent[i].length());
+			inputContent[i] = Base64Encode(inputContent[i]);
 			inputContent[i].insert(0,"aaa");
 			std::cout << "Line:"<< i+1<<std::endl;
 			inputContent[i] = OCSS::Encrypt(inputContent[i], keys);
@@ -204,10 +212,7 @@ void tui_main()
 	refresh();
 	if(Select == "E"){
 		std::string Data = data;
-		const unsigned char * constStr = reinterpret_cast<const unsigned char *> (data);
-		
-		Data = base64_encode(constStr,
-					Data.length());
+		Data = Base64Encode(Data);
 		Data.insert(0,"aaa");
 		Data = OCSS::Encrypt(Data,keys);
 		data = &Data[0];
@@ -219,7 +224,8 @@ void tui_main()
 		std::reverse(keys.begin(), keys.end());
 		OCSS::Decrypt(Data, keys);
 		Data.erase(0,3);
-		Data = base64_decode(Data);
+		Data = Base64Decode(Data);
+		Data = RmZero(Data);
 		data = &Data[0];
 		printw("%s\n", data);
 		refresh();
@@ -359,9 +365,7 @@ int main(int argc, char* argv[]){
 	std::cin>>Select;
 
 	if(Select == "E"){
-		const unsigned char * constStr = reinterpret_cast<const unsigned char *> (data.c_str());
-		data = base64_encode(constStr,
-					data.length());
+		data = Base64Encode(data);
 		data.insert(0,"aaa");
 		std::cout<<"\nResult:\n"<<OCSS::Encrypt(data, keys)<<std::endl;
 	}
@@ -369,7 +373,8 @@ int main(int argc, char* argv[]){
 		std::reverse(keys.begin(), keys.end());
 		OCSS::Decrypt(data, keys);
 		data.erase(0,3);
-		data = base64_decode(data);
+		data = Base64Decode(data);
+		data = RmZero(data);
 		printf("\nResult:\n");
 		std::cout<<data<<std::endl;
 	}

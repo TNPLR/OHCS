@@ -1,6 +1,5 @@
 #include "OCSS.hpp"
 #include "del.hpp"
-#include "base64.h"
 #include <cstdlib>
 #include <vector>
 #include <ctime>
@@ -11,27 +10,9 @@
 #include <sstream>
 #include "BigIntegerLibrary.hh"
 #include <cstring>
+#include "exception.hpp"
 #ifdef OpenMP
 #include "omp.h"
-#endif
-#ifndef EXCEPTION
-#define EXCEPTION
-
-class Exception {
-public:
-	Exception() {
-	
-	}
-	Exception(const char *message) : _message(message) {
-	
-	}
-
-	virtual const char* message() {
-		return _message;
-	}
-protected:
-	const char *_message;
-};
 #endif
 class KeyChangeException : public Exception {
 public:
