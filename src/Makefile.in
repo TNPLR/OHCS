@@ -181,12 +181,9 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-CC = @CC@
-CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@
-CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
+CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -198,6 +195,7 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GREP = @GREP@
+HAVE_CXX11 = @HAVE_CXX11@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -226,7 +224,6 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
-ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -265,8 +262,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CXXFLAGS = -Wall -fopenmp -DUNIX -O3 -std=gnu++11 -I/usr/include/boost -I${top_srcdir}/include -flto -Wno-deprecated -lncurses -lpthread -DOpenMP
-ohcs_SOURCES = main.cpp OCSS.cpp del.cpp BigIntegerAlgorithms.cc BigUnsigned.cc BigInteger.cc BigUnsignedInABase.cc BigIntegerUtils.cc BigIntegerAlgorithms.hh  BigIntegerLibrary.hh  BigUnsigned.hh del.hpp OCSS.hpp BigInteger.hh BigIntegerUtils.hh BigUnsignedInABase.hh  NumberlikeArray.hh	base64.cpp base64.h
+AM_CXXFLAGS = -static -static-libgcc -static-libstdc++ -Wall -DWIN32 -std=gnu++11 -I/usr/include/boost -I${top_srcdir}/include -Wno-deprecated
+ohcs_SOURCES = main.cpp OCSS.cpp del.cpp BigIntegerAlgorithms.cc BigUnsigned.cc BigInteger.cc BigUnsignedInABase.cc BigIntegerUtils.cc BigIntegerAlgorithms.hh  BigIntegerLibrary.hh  BigUnsigned.hh del.hpp OCSS.hpp BigInteger.hh BigIntegerUtils.hh BigUnsignedInABase.hh  NumberlikeArray.hh	base64.cpp base64.hpp
 all: all-am
 
 .SUFFIXES:

@@ -37,7 +37,6 @@ Made by Hsiaosvideo
 #ifdef OpenMP
 #include "omp.h"
 #endif
-#include "base64.hpp"
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
 #endif
@@ -49,6 +48,10 @@ char *ReadFile = R;
 #include "del.hpp"
 #include <fstream>
 #include "OCSS.hpp"
+#include "base64.hpp"
+using Base64::Base64Encode;
+using Base64::Base64Decode;
+using Base64::RmZero;
 //#include <thread>
 #ifdef UNIX
 #include <ncurses.h>
@@ -58,9 +61,6 @@ const char *  version = "2.1.1";
 #ifdef UNIX
 #include <thread>
 
-using Base64::Base64Encode;
-using Base64::Base64Decode;
-using Base64::RmZero;
 const char* program_name;
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
 void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));
@@ -334,6 +334,7 @@ int main(int argc, char* argv[]){
 	*/
 	//threadtest(version);
 #ifdef WIN32
+	using namespace std;
 	ios_base::sync_with_stdio(false);
 	std::string new_data = "";
 	version_show();
@@ -346,20 +347,6 @@ int main(int argc, char* argv[]){
 	for (char &x : key) {
 		keys.push_back(x);
 	}
-#endif
-#ifdef UNIX
-	/*
-	if(mode){
-		x.Decrypt(data, keys);
-		cout<<data<<endl;
-	}
-	else{
-		x.Encrypt(data, keys);
-		cout<<data<<endl;
-	}
-	*/
-#endif
-#ifdef WIN32
 	std::string Select;
 	std::cout<<"[E]ncrypt or [D]ecrypt?\n";
 	std::cin>>Select;
@@ -380,10 +367,5 @@ int main(int argc, char* argv[]){
 	}
 	system("pause");
 #endif
-
-
-	//x.Decrypt(data, keys);
-	//a.Encrypt("Hello",);
-
 	return 0;
 }
