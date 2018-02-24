@@ -11,9 +11,7 @@
 #include "BigIntegerLibrary.hh"
 #include <cstring>
 #include "exception.hpp"
-#ifdef OpenMP
 #include "omp.h"
-#endif
 class KeyChangeException : public Exception {
 public:
 	KeyChangeException(int);
@@ -140,9 +138,7 @@ void OCSS::Decrypt(std::string& Data,std::vector<char>& Key)
         for(char &remove_key : Key)
         {
                 int remove_value = 0;
-                #ifdef OpenMP
 		#pragma omp parallel for
-		#endif
                 for (unsigned int values = 0; values < Char_List.length(); ++values)
                 {
                         if (Char_List[values] == remove_key)

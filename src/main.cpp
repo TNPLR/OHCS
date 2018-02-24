@@ -33,12 +33,7 @@ Made by Hsiaosvideo
 #include <thread>
 #include "BigIntegerLibrary.hh"
 #include <cstring>
-#ifndef OpenMP
-#define OpenMP
-#endif
-#ifdef OpenMP
 #include "omp.h"
-#endif
 #ifndef __GNUC__
 # define __attribute__(x) /*NOTHING*/
 #endif
@@ -59,7 +54,7 @@ using Base64::RmZero;
 #include <ncurses.h>
 #include <getopt.h>
 #endif
-const char *  version = "2.1.1";
+const char *  version = "3.0.0";
 #ifdef UNIX
 
 const char* program_name;
@@ -180,9 +175,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 	if(mode){
 		std::vector<std::string>&& inputContent = base64_read_file(input_filename);
 		std::reverse(keys.begin(), keys.end());
-#ifdef OpenMP
 		#pragma omp parallel for num_threads(4)
-#endif
 		for(unsigned int i=0; i < inputContent.size(); i++){
 			OCSS::Decrypt(inputContent[i], keys);
 			inputContent[i].erase(0,3);
@@ -197,9 +190,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 	}
 	else{
 		std::vector<std::string>&& inputContent = read_file(input_filename);
-#ifdef OpenMP
 		#pragma omp parallel for num_threads(4)
-#endif	
 		for(unsigned int i=0; i < inputContent.size(); i++){
 #ifdef DEBUG
 			std::cout << inputContent[i] << std::endl;
