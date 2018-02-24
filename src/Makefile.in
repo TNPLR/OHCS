@@ -262,7 +262,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CXXFLAGS = -static -static-libgcc -static-libstdc++ -Wall -DWIN32 -std=gnu++11 -I/usr/include/boost -I${top_srcdir}/include -Wno-deprecated
+AM_CXXFLAGS = -static -static-libstdc++ -static-libgcc  -fopenmp -Wall -DWIN32 -std=gnu++11 -I/usr/include/boost -I${top_srcdir}/include -Wno-deprecated
 ohcs_SOURCES = main.cpp OCSS.cpp del.cpp BigIntegerAlgorithms.cc BigUnsigned.cc BigInteger.cc BigUnsignedInABase.cc BigIntegerUtils.cc BigIntegerAlgorithms.hh  BigIntegerLibrary.hh  BigUnsigned.hh del.hpp OCSS.hpp BigInteger.hh BigIntegerUtils.hh BigUnsignedInABase.hh  NumberlikeArray.hh	base64.cpp base64.hpp
 all: all-am
 

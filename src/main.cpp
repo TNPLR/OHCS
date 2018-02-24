@@ -22,6 +22,7 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
+#include <locale>
 #include <vector>
 #include <ctime>
 #include <cstdio>
@@ -160,7 +161,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 	exit(0);
 }
 #endif
-void version_show()
+inline void version_show()
 {
 #ifdef WIN32
 	std::cout<<"OH Crytoservice System on Windows\n Vesion "<<version<<'\n';
@@ -308,33 +309,9 @@ int main(int argc, char* argv[]){
 	}
 	file_in_cs(mode,input_filename,key,output_filename);
 #endif
-	/*
-	int _checkAlpha = 1;
-	for(int a = 0;a < argc;a++){
-		argvCheck(argv[a]);
-	}
-	if(ReadFile[0] == '\0'){
-		_checkAlpha = 0;
-	}
-	if(_checkAlpha){
-		FILE *file2 = fopen(ReadFile, "r");
-		if(!file2) {
-			printf("Error: Can not read the file.");
-			return 1;
-		}
-		char dataINPUT[128];
-		int gg__gg = 0;
-		char ch;
-		while((ch = fgetc(file2)) != EOF) {
-			dataINPUT[gg__gg] = ch;
-			++gg__gg;
-		}
-		data = dataINPUT;
-	}
-	*/
-	//threadtest(version);
 #ifdef WIN32
 	using namespace std;
+	system("chcp 65001");
 	ios_base::sync_with_stdio(false);
 	std::string new_data = "";
 	version_show();
@@ -342,7 +319,6 @@ int main(int argc, char* argv[]){
 	getline(cin,data);
 	std::cout<<" Key:"<<'\n';
 	getline(cin,key);
-
 	std::vector<char> keys;
 	for (char &x : key) {
 		keys.push_back(x);
@@ -350,11 +326,11 @@ int main(int argc, char* argv[]){
 	std::string Select;
 	std::cout<<"[E]ncrypt or [D]ecrypt?\n";
 	std::cin>>Select;
-
 	if(Select == "E"){
 		data = Base64Encode(data);
 		data.insert(0,"aaa");
-		std::cout<<"\nResult:\n"<<OCSS::Encrypt(data, keys)<<std::endl;
+		data = OCSS::Encrypt(data,keys);
+		std::cout<<"\nResult:\n"<< data<<std::endl;
 	}
 	else{
 		std::reverse(keys.begin(), keys.end());
