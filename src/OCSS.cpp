@@ -82,9 +82,6 @@ std::string OCSS::Encrypt(std::string Data,std::vector<char> Key)
 	for(char plugin_key : Key)
         {
 		int plugin_value = 0;
-                #ifdef OpenMP
-		#pragma omp parallel for
-		#endif
                 for (unsigned int values = 0; values < Char_List.length() ; ++values)
                 {
                         if (Char_List[values] == plugin_key)
@@ -138,7 +135,6 @@ void OCSS::Decrypt(std::string& Data,std::vector<char>& Key)
         for(char &remove_key : Key)
         {
                 int remove_value = 0;
-		#pragma omp parallel for
                 for (unsigned int values = 0; values < Char_List.length(); ++values)
                 {
                         if (Char_List[values] == remove_key)

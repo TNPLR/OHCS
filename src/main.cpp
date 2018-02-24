@@ -54,7 +54,7 @@ using Base64::RmZero;
 #include <ncurses.h>
 #include <getopt.h>
 #endif
-const char *  version = "3.0.0";
+const char *  version = "3.0.1";
 #ifdef UNIX
 
 const char* program_name;
@@ -85,6 +85,7 @@ std::vector<std::string> base64_read_file(std::string input_filename)
 	std::string inputStr;
 	std::vector<std::string> inputContent;
 	while(getline(fin, inputStr)){
+		if(inputStr == "") continue;
 		inputContent.push_back(inputStr);
 	}
 #ifdef DEBUG
