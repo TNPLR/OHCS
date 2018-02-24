@@ -30,6 +30,7 @@ Made by Hsiaosvideo
 #include <algorithm>
 #include <string>
 #include <sstream>
+#include <thread>
 #include "BigIntegerLibrary.hh"
 #include <cstring>
 #ifndef OpenMP
@@ -60,7 +61,6 @@ using Base64::RmZero;
 #endif
 const char *  version = "2.1.1";
 #ifdef UNIX
-#include <thread>
 
 const char* program_name;
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
@@ -79,11 +79,16 @@ void print_usage(FILE* stream, int exit_code)
 		"\t-t\t--tui\t\t\tTUI mode\n");
 	exit(exit_code);
 }
-std::vector<std::string> read_file(std::ifstream& fin)
+#endif
+std::vector<std::string> base64_read_file(std::string input_filename)
 {
-	
+	std::ifstream fin(input_filename, std::ios::in);
+	if(!fin) {
+		std::cerr << "Error:Can not input this file.\n";
+		exit(-1);
+	}
 	std::string inputStr;
-	std::vector<std::string> inputContent;	
+	std::vector<std::string> inputContent;
 	while(getline(fin, inputStr)){
 		inputContent.push_back(inputStr);
 	}
@@ -95,13 +100,44 @@ std::vector<std::string> read_file(std::ifstream& fin)
 	fin.close();
 	return inputContent;
 }
-inline void write_file(std::string output_filename, std::vector<std::string> inputContent)
+std::vector<std::string> read_file(std::string input_filename)
+{
+	std::ifstream fin(input_filename, std::ios::in | std::ios::binary);
+	if(!fin) {
+		std::cerr << "Error:Can not input this file.\n";
+		exit(-1);
+	}
+	char inputChar;
+	std::string inputStr;
+	std::vector<std::string> inputContent;
+	unsigned int i = 0;	
+	while(!fin.eof()){
+		fin.get(inputChar);
+		inputStr.push_back(inputChar);
+		++i;
+		if(i == 128){
+			inputContent.push_back(inputStr);
+			inputStr = "";
+			i = 0;
+		}
+	}
+	inputContent.push_back(inputStr);
+	inputStr = "";
+#ifdef DEBUG
+	for(unsigned int i=0; i < inputContent.size();i++){
+		std::cout<<inputContent[i]<<std::endl;	
+	}
+#endif
+	fin.close();
+	return inputContent;
+}
+inline void base64_write_file(std::string output_filename, std::vector<std::string> inputContent)
 {
 #ifdef DEBUG
 	auto cout_data = [=](std::vector<std::string> inputContent)->void
 			{
 				for(unsigned int i=0; i < inputContent.size(); i++){
-					std::cout << inputContent[i] << std::endl;
+					std::cout << inputContent[i];
 				}
 			};
 	std::thread mThread(cout_data,inputContent);
@@ -115,20 +151,34 @@ inline void write_file(std::string output_filename, std::vector<std::string> inp
 	mThread.join();
 #endif
 }
+inline void write_file(std::string output_filename, std::vector<std::string> inputContent)
+{
+#ifdef DEBUG
+	auto cout_data = [=](std::vector<std::string> inputContent)->void
+			{
+				for(unsigned int i=0; i < inputContent.size(); i++){
+					std::cout << inputContent[i];
+				}
+			};
+	std::thread mThread(cout_data,inputContent);
+#endif
+	std::ofstream out(output_filename, std::ios::out | std::ios::binary);
+	for(unsigned int i=0; i < inputContent.size(); i++){
+		out << inputContent[i];
+	}
+	out.close();
+#ifdef DEBUG
+	mThread.join();
+#endif
+}
 void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename)
 {
 	std::vector<char> keys;
 	for (char &x : key) {
 		keys.push_back(x);
 	}
-	std::ifstream fin;
-	fin.open(input_filename);
-	if(!fin) {
-		std::cerr << "Error:Can not input this file.\n";
-		exit(-1);
-	}
-	std::vector<std::string>&& inputContent = read_file(fin);
 	if(mode){
+		std::vector<std::string>&& inputContent = base64_read_file(input_filename);
 		std::reverse(keys.begin(), keys.end());
 #ifdef OpenMP
 		#pragma omp parallel for num_threads(4)
@@ -142,8 +192,11 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 				inputContent[i] = Base64::RmZero(inputContent[i]);
 			}
 		}
+		inputContent[inputContent.size() - 1].pop_back();
+		write_file(output_filename, inputContent);
 	}
 	else{
+		std::vector<std::string>&& inputContent = read_file(input_filename);
 #ifdef OpenMP
 		#pragma omp parallel for num_threads(4)
 #endif	
@@ -156,11 +209,10 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 			std::cout << "Line:"<< i+1<<std::endl;
 			inputContent[i] = OCSS::Encrypt(inputContent[i], keys);
 		}
+		base64_write_file(output_filename, inputContent);
 	}
-	write_file(output_filename, inputContent);
 	exit(0);
 }
-#endif
 inline void version_show()
 {
 #ifdef WIN32
@@ -311,37 +363,22 @@ int main(int argc, char* argv[]){
 #endif
 #ifdef WIN32
 	using namespace std;
-	system("chcp 65001");
 	ios_base::sync_with_stdio(false);
 	std::string new_data = "";
 	version_show();
-	std::cout<<" Data:\n";
+	std::cout<<" File:\n";
 	getline(cin,data);
 	std::cout<<" Key:"<<'\n';
 	getline(cin,key);
-	std::vector<char> keys;
-	for (char &x : key) {
-		keys.push_back(x);
-	}
 	std::string Select;
 	std::cout<<"[E]ncrypt or [D]ecrypt?\n";
 	std::cin>>Select;
 	if(Select == "E"){
-		data = Base64Encode(data);
-		data.insert(0,"aaa");
-		data = OCSS::Encrypt(data,keys);
-		std::cout<<"\nResult:\n"<< data<<std::endl;
+		file_in_cs(0,data,key,data);	
 	}
 	else{
-		std::reverse(keys.begin(), keys.end());
-		OCSS::Decrypt(data, keys);
-		data.erase(0,3);
-		data = Base64Decode(data);
-		data = RmZero(data);
-		printf("\nResult:\n");
-		std::cout<<data<<std::endl;
+		file_in_cs(1,data,key,data);
 	}
-	system("pause");
 #endif
 	return 0;
 }
