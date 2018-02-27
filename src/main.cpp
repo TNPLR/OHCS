@@ -55,10 +55,10 @@ using Base64::RmZero;
 #include <getopt.h>
 #endif
 const char *  version = "3.0.1";
+void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
 #ifdef UNIX
 
 const char* program_name;
-void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
 void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));
 void print_usage(FILE* stream, int exit_code)
 {
@@ -176,7 +176,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 	if(mode){
 		std::vector<std::string>&& inputContent = base64_read_file(input_filename);
 		std::reverse(keys.begin(), keys.end());
-		#pragma omp parallel for num_threads(4)
+		#pragma omp parallel for
 		for(unsigned int i=0; i < inputContent.size(); i++){
 			OCSS::Decrypt(inputContent[i], keys);
 			inputContent[i].erase(0,3);
@@ -191,7 +191,7 @@ void file_in_cs(int mode,std::string input_filename, std::string key, std::strin
 	}
 	else{
 		std::vector<std::string>&& inputContent = read_file(input_filename);
-		#pragma omp parallel for num_threads(4)
+		#pragma omp parallel for
 		for(unsigned int i=0; i < inputContent.size(); i++){
 #ifdef DEBUG
 			std::cout << inputContent[i] << std::endl;
