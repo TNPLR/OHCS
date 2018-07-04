@@ -1,4 +1,6 @@
 #include "OCSS.hpp"
+#include <algorithm>
+#include <array>
 #include "del.hpp"
 #include <cstdlib>
 #include <vector>
@@ -12,6 +14,9 @@
 #include <cstring>
 #include "exception.hpp"
 #include "omp.h"
+#ifdef DEBUG
+#include "DebugTimer.hpp"
+#endif
 class KeyChangeException : public Exception {
 public:
 	KeyChangeException(int);
@@ -81,6 +86,7 @@ std::string OCSS::Encrypt(std::string Data,std::vector<char> Key)
 #endif
 	for(char plugin_key : Key)
         {
+		unsigned int datalength = Data.length();
 		int plugin_value = 0;
                 for (unsigned int values = 0; values < Char_List.length() ; ++values)
                 {
@@ -94,18 +100,27 @@ std::string OCSS::Encrypt(std::string Data,std::vector<char> Key)
                 printf("Base %d-\"%c\"||", plugin_value, Char_List[plugin_value - 1]);
 		std::cout<<Data<<'\n';
 #endif
-	    	unsigned int plugin_count = rand()%Data.length()/3+1;
+
+	    	unsigned int plugin_count = rand()%datalength/3+1;
                 std::vector<unsigned int> plugin_location;
-                while (plugin_count > 0)
+		plugin_location.reserve(plugin_count);
+                for (int i = 0;plugin_count > 0; --plugin_count,++i)
                 {
-                        plugin_location.push_back(rand()%Data.length());
-                        plugin_count--;
+                        plugin_location[i] = rand()%datalength;
                 }
+
+/*	
+		const unsigned int plugin_count = rand()%datalength/3;
+		std::array<unsigned int, plugin_count> plugin_location = {0};
+		for(unsigned *ptr = plugin_location.data; plugin_count >= 0; --plugin_count, ++ptr){
+			*ptr = rand()%datalength;
+		}
+*/
                 //#pragma omp parallel for
                 for(unsigned int& this_location : plugin_location)
                 {
                         std::string new_data = "";
-                        for (unsigned int x = 0; x < Data.length(); ++x)
+                        for (unsigned int x = 0; x < datalength; ++x)
                         {
                                 if (x == this_location)
                                 {
@@ -188,9 +203,11 @@ void OCSS::ToBase(std::string& Data,int Original_Base,int New_Base)
         while (total_value > 0) 
         {
                 int left = (total_value % New_Base).toInt();
-                return_value = Char_List[left] + return_value;
+                // return_value = Char_List[left] + return_value;
+		return_value += Char_List[left];
                 total_value = (total_value - left) / New_Base;
         }
+	reverse(return_value.begin(),return_value.end());
         Data = return_value;
         return;
 }
