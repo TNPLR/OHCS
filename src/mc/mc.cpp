@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "des.h"
+#include "cipher.h"
 
 int main(int argc, char* argv[]){
 	char ch;

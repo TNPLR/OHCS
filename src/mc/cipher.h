@@ -1,5 +1,5 @@
-#ifndef OHCS_MC_DES_H_
-#define	OHCS_MC_DES_H_
+#ifndef OHCS_MC_CIPHER_H_
+#define	OHCS_MC_CIPHER_H_
 #include <random>
 namespace des{
 	const short IP[] = {
