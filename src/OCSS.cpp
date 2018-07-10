@@ -1,5 +1,4 @@
 #include "OCSS.hpp"
-#include <algorithm>
 #include <array>
 #include "del.hpp"
 #include <cstdlib>
