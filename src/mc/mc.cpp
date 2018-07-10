@@ -1,30 +1,45 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
-#include <iomanip>
+#include <string>
 #include "des.h"
 
 int main(int argc, char* argv[]){
 	char ch;
 	int count = 0;
-	if(argc < 3 || argc > 4){
+	std::string inputargument[3];
+	if(argc == 1){
+		
+		std::cout << "Encrypt[enc] or Decrypt[dec]? " << std::endl;
+		std::cin >> inputargument[0];
+		std::cout << "Inputfile? " << std::endl;
+		std::cin >> inputargument[1];
+		std::cout << "Outputfile? " << std::endl;
+		std::cin >> inputargument[2];
+	}
+	else if(argc < 3 || argc > 4){
 		std::cout << "OH DES" << std::endl
 			 << " >> ohdes <enc/dec> <input filename> [output filename]" << std::endl;
 		return 1;
 	}
+	else{
+		inputargument[0] = argv[1];
+		inputargument[1] = argv[2];
+		inputargument[2] = argv[3];
+	}
 	int mode = 0;
-	if(strcmp(argv[1],"enc") == 0){
+	if(inputargument[0] == "enc"){
 		mode = 0;
 	}
-	else if(strcmp(argv[1],"dec") == 0){
+	else if(inputargument[0] == "dec"){
 		mode = 1;
 	}
 	else{
 		std::cout << "FATAL: Mode Not Correct" << std::endl;
 		return 2;
 	}
-	std::ifstream fin(argv[2], std::ios::binary);
-	std::ofstream fout(argv[3], std::ios::binary);
+	std::ifstream fin(inputargument[1], std::ios::binary);
+	std::ofstream fout(inputargument[2], std::ios::binary);
 	if(!fin){
 		std::cout << "Cannot open the file" << std::endl;
 		return -1;
@@ -85,7 +100,6 @@ int main(int argc, char* argv[]){
 	if(mode == 0 && count_while != 0){
 		++encrypedblocks;
 		secret = cbc.Next(plaintext);
-		std::cout << std::setw(2) << std::hex << plaintext << std::endl;
 		fout.write((char*)&secret, sizeof(secret));
 	}
 	plaintextremain = count_while;
