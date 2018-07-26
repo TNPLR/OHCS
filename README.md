@@ -19,8 +19,8 @@
 ---------------------------------------------------------------------------------------------------------------
 # What does the system do?
 
-OHCS can encrypt and decrypt a string by changing the carry of a string. OHCS randomly insert lots of chars
-into a string. Therefore, OHCS can encrypt the same string to different string.
+OHCS can encrypt and decrypt a string by changing the carry of a string. OHCS randomly insert lots of characters
+into a string. Therefore, OHCS can encrypt the same string to the different strings.
 # Notice
 The compiler needs to support c++11 standard
 # INSTALL
