@@ -1,21 +1,16 @@
 #include "OCSS.hpp"
-#include <array>
 #include "del.hpp"
-#include <cstdlib>
+
+#include <gmpxx.h>
+#include "exception.hpp"
+#include "omp.h"
+
 #include <vector>
-#include <ctime>
-#include <cstdio>
 #include <iostream>
 #include <algorithm>
 #include <string>
 #include <sstream>
-#include "BigIntegerLibrary.hh"
-#include <cstring>
-#include "exception.hpp"
-#include "omp.h"
-#ifdef DEBUG
-#include "DebugTimer.hpp"
-#endif
+
 class KeyChangeException : public Exception {
 public:
 	KeyChangeException(int);
@@ -28,6 +23,7 @@ public:
 		return _message;
 	}
 };
+
 KeyChangeException::KeyChangeException(int index) {
 	std::string str1;
 	std::stringstream sstr;
@@ -37,6 +33,7 @@ KeyChangeException::KeyChangeException(int index) {
 	str2.append(str1);
 	_message = str2.c_str();
 }
+
 class BaseZeroOneException : public Exception {
 public:
 	BaseZeroOneException(const char *message) {
@@ -46,10 +43,13 @@ public:
 		return _message;
 	}
 };
-std::string Char_List = "#*ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+const std::string Char_List = "#*ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 			"abcdefghijklmnopqrstuvwxyz"
 			"0123456789+/=!";
-const int last_key_init = 68;
+
+constexpr const int last_key_init = 68;
+
 #ifdef SEOHCS
 std::string OCSS::SafetyEncrypt(std::string Data,std::vector<char> Key)
 {
@@ -67,9 +67,6 @@ std::string OCSS::SafetyEncrypt(std::string Data,std::vector<char> Key)
 			return encrypt_data;
 		}
 		else{
-#ifdef DEBUG
-			std::cout<<"Try agian:";
-#endif
 			Key = backup_key;
 			Data = backup_data;
 			continue;
@@ -77,12 +74,10 @@ std::string OCSS::SafetyEncrypt(std::string Data,std::vector<char> Key)
 	}
 }
 #endif	
+
 std::string OCSS::Encrypt(std::string Data,std::vector<char> Key)
 {
 	int last_key = last_key_init;
-#ifdef DEBUG
-	printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]);std::cout<<Data<<'\n';
-#endif
 	for(char plugin_key : Key)
         {
 		unsigned int datalength = Data.length();
@@ -95,10 +90,6 @@ std::string OCSS::Encrypt(std::string Data,std::vector<char> Key)
                         }
                 }
                 ToBase(Data, last_key, plugin_value);
-#ifdef DEBUG
-                printf("Base %d-\"%c\"||", plugin_value, Char_List[plugin_value - 1]);
-		std::cout<<Data<<'\n';
-#endif
 
 	    	unsigned int plugin_count = rand()%datalength/3+1;
                 std::vector<unsigned int> plugin_location;
@@ -108,13 +99,6 @@ std::string OCSS::Encrypt(std::string Data,std::vector<char> Key)
                         plugin_location[i] = rand()%datalength;
                 }
 
-/*	
-		const unsigned int plugin_count = rand()%datalength/3;
-		std::array<unsigned int, plugin_count> plugin_location = {0};
-		for(unsigned *ptr = plugin_location.data; plugin_count >= 0; --plugin_count, ++ptr){
-			*ptr = rand()%datalength;
-		}
-*/
                 //#pragma omp parallel for
                 for(unsigned int& this_location : plugin_location)
                 {
@@ -130,22 +114,14 @@ std::string OCSS::Encrypt(std::string Data,std::vector<char> Key)
                         Data = new_data;
                 }
                 last_key = (int)(plugin_value + 1);
-#ifdef DEBUG
-                printf("Base %d-\"%c\"||", plugin_value + 1, Char_List[plugin_value]); std::cout<<Data<<'\n';//Debug
-#endif
 	}
         ToBase(Data, last_key, last_key_init);
-#ifdef DEBUG
-        printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]); std::cout<<Data<<'\n';
-#endif
 	return Data;
 }
+
 void OCSS::Decrypt(std::string& Data,std::vector<char>& Key)
 {
 	int last_key = last_key_init;
-#ifdef DEBUG
-        printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]);std::cout<<Data<<'\n';
-#endif
         for(char &remove_key : Key)
         {
                 int remove_value = 0;
@@ -157,9 +133,7 @@ void OCSS::Decrypt(std::string& Data,std::vector<char>& Key)
                         }
                 }
                 ToBase(Data, last_key, (int)(remove_value + 1));
-#ifdef DEBUG
-                printf("Base %d-\"%c\"||", remove_value + 1, Char_List[remove_value]);std::cout<<Data<<'\n';
-#endif
+
 #ifdef UNIX
 				dell::del(Data, remove_key);
 #endif
@@ -167,24 +141,19 @@ void OCSS::Decrypt(std::string& Data,std::vector<char>& Key)
 				char tmpRemove[] = {remove_key};
 				dell::remove(tmpRemove,Data);
 #endif // WIN32
-#ifdef DEBUG
-                printf("Base %d-\"%c\"||", remove_value, Char_List[remove_value - 1]);std::cout<<Data<<'\n';
-#endif
                 last_key = remove_value;
         }
         ToBase(Data, last_key, last_key_init);
-#ifdef DEBUG
-	printf("Base %d-\"%c\"||", last_key_init, Char_List[last_key_init-1]); std::cout<<Data<<'\n';
-#endif
 }
+
 void OCSS::ToBase(std::string& Data,int Original_Base,int New_Base)
 {
         if (Original_Base == 0 || Original_Base == 1 || New_Base == 0 || New_Base == 1 || Data == "")
         {
 		throw BaseZeroOneException("ERROR: BaseZeroOneException");
-                return;
+		return;
         }
-        BigInteger total_value = 0;
+        mpz_class total_value = 0;
         for(char& data : Data)
         {
                 total_value *= Original_Base;
@@ -198,42 +167,15 @@ void OCSS::ToBase(std::string& Data,int Original_Base,int New_Base)
                 }
                 total_value += values;
         }
-        std::string return_value = "";
+        std::string return_value{""};
         while (total_value > 0) 
         {
-                int left = (total_value % New_Base).toInt();
+                mpz_class left = (total_value % New_Base);
                 // return_value = Char_List[left] + return_value;
-		return_value += Char_List[left];
+		return_value += Char_List[left.get_si()];
                 total_value = (total_value - left) / New_Base;
         }
 	reverse(return_value.begin(),return_value.end());
         Data = return_value;
         return;
 }
-#ifdef DEBUG
-int OCSS::Char_Value(char chars)
-{
-        unsigned int values;
-        //#pragma omp parallel for
-        for (values = 0; values < Char_List.length() ; ++values)
-        {
-                if (Char_List[values] == chars)
-                {
-                        break;
-                }
-        }
-        return values;
-}
-bool OCSS::check()
-{
-        std::string x = "ASC";
-        std::string z = x;
-        OCSS::ToBase(x, 95, 23);
-        OCSS::ToBase(x, 23, 95);
-        if (x == z)
-        {
-                return true;
-        }
-        return false;
-}
-#endif

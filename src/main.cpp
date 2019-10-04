@@ -31,7 +31,6 @@ Made by Hsiaosvideo
 #include <string>
 #include <sstream>
 #include <thread>
-#include "BigIntegerLibrary.hh"
 #include <cstring>
 #include "omp.h"
 #ifndef __GNUC__
@@ -62,7 +61,7 @@ const char* program_name;
 void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));
 void print_usage(FILE* stream, int exit_code)
 {
-	fprintf(stream, "Usage: %s [-e | -d] options [-i input-file]\n", program_name);
+	fprintf(stream, "Usage: %s [-e | -d] options -i input-file -o output-file\n", program_name);
 	fprintf(stream,
 		"\t-h\t--help\t\t\tDisplay this help page.\n"
 		"\t-e\t--encrypt\t\tEncrypt mode.\n"
