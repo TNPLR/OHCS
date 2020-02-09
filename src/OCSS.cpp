@@ -132,14 +132,7 @@ void OCSS::Decrypt(std::string& Data,std::vector<char>& Key)
                         }
                 }
                 ToBase(Data, last_key, (int)(remove_value + 1));
-
-#ifdef UNIX
-				dell::del(Data, remove_key);
-#endif
-#ifdef WIN32
-				char tmpRemove[] = {remove_key};
-				dell::remove(tmpRemove,Data);
-#endif // WIN32
+		dell::del(Data, remove_key);
                 last_key = remove_value;
         }
         ToBase(Data, last_key, last_key_init);
