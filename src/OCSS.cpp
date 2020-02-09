@@ -44,12 +44,6 @@ public:
 	}
 };
 
-const std::string Char_List = "#*ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-			"abcdefghijklmnopqrstuvwxyz"
-			"0123456789+/=!";
-
-constexpr const int last_key_init = 68;
-
 #ifdef SEOHCS
 std::string OCSS::SafetyEncrypt(std::string Data,std::vector<char> Key)
 {
@@ -74,6 +68,11 @@ std::string OCSS::SafetyEncrypt(std::string Data,std::vector<char> Key)
 	}
 }
 #endif	
+const std::string Char_List = "#*ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+			"abcdefghijklmnopqrstuvwxyz"
+			"0123456789+/=!";
+
+constexpr const int last_key_init = 68;
 
 std::string OCSS::Encrypt(std::string Data,std::vector<char> Key)
 {
@@ -146,7 +145,7 @@ void OCSS::Decrypt(std::string& Data,std::vector<char>& Key)
         ToBase(Data, last_key, last_key_init);
 }
 
-void OCSS::ToBase(std::string& Data,int Original_Base,int New_Base)
+void OCSS::ToBase(std::string& Data, int Original_Base,int New_Base)
 {
         if (Original_Base == 0 || Original_Base == 1 || New_Base == 0 || New_Base == 1 || Data == "")
         {
@@ -154,18 +153,10 @@ void OCSS::ToBase(std::string& Data,int Original_Base,int New_Base)
 		return;
         }
         mpz_class total_value = 0;
-        for(char& data : Data)
+        for(char const data : Data)
         {
                 total_value *= Original_Base;
-                unsigned int values = 0;
-                for (; values < Char_List.length(); ++values)
-                {
-                        if (Char_List[values] == data)
-                        {
-                                break;
-                        }
-                }
-                total_value += values;
+                total_value += Char_List.find(data);
         }
         std::string return_value{""};
         while (total_value > 0) 
@@ -175,7 +166,7 @@ void OCSS::ToBase(std::string& Data,int Original_Base,int New_Base)
 		return_value += Char_List[left.get_si()];
                 total_value = (total_value - left) / New_Base;
         }
-	reverse(return_value.begin(),return_value.end());
+	reverse(return_value.begin(), return_value.end());
         Data = return_value;
         return;
 }
