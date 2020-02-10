@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-
+## [4.0.0]
+#	+ Binary file & binary output
+#	+ Boost Program Options
+#	- Remove Microsoft Windows support
+#	- Remove TUI
+#	- Remove Safety Encrypt OHCS
+## [3.0.0]
+### Added
+#	+ Binary file support
+#	+ All encoding support
+### Changed
+#	- CANNOT Decrypt <= 2.1.0 file
 ## [2.1.0]
 ### Added
 #	+ OpenMP support
