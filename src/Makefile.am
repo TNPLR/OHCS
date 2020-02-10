@@ -1,4 +1,7 @@
-#AM_CXXFLAGS=-static -static-libstdc++ -static-libgcc -fopenmp -Wall -DWIN32 -std=gnu++11 -I/usr/include/boost -I${top_srcdir}/include -Wno-deprecated
-AM_CXXFLAGS=-lboost_system -lrt -lncurses -fopenmp -Wall -DUNIX -lpthread -std=gnu++11 -I/usr/include/boost -I${top_srcdir}/include -Wno-deprecated -static -ltinfo -lgmpxx -lgmp
+AUTOMAKE_OPTIONS = foreign
+
+AM_CXXFLAGS=-Wall -std=c++11 -I${top_srcdir}/include -Wextra -Wpedantic
+
 bin_PROGRAMS=ohcs
-ohcs_SOURCES=main.cpp OCSS.cpp del.cpp OCSS.hpp base64.cpp
+ohcs_SOURCES=main.cpp OCSS.cpp $(top_srcdir)/include/del.hpp $(top_srcdir)/include/OCSS.hpp
+ohcs_LDADD=-lboost_system -lgmpxx -lgmp -lboost_program_options

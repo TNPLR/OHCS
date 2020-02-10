@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2017 CHAW-HUNG, HSIAO
+	Copyright (C) 2017,2020 CHAW-HUNG, HSIAO
 
 ---------------------------------------------------------------------------------------------------------------
 	This file is part of OH Cryptography System.
@@ -22,354 +22,192 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
-#include <locale>
-#include <vector>
-#include <ctime>
-#include <cstdio>
-#include <iostream>
-#include <algorithm>
-#include <string>
-#include <sstream>
-#include <thread>
-#include <cstring>
-#include "omp.h"
-#ifndef __GNUC__
-# define __attribute__(x) /*NOTHING*/
-#endif
-/*
-char file = 0;
-char R[100];
-char *ReadFile = R;
-*/
-#include "del.hpp"
-#include <fstream>
 #include "OCSS.hpp"
-#include "base64.hpp"
-using Base64::Base64Encode;
-using Base64::Base64Decode;
-using Base64::RmZero;
-//#include <thread>
-#ifdef UNIX
-#include <ncurses.h>
-#include <getopt.h>
-#endif
-const char *  version = "3.0.1";
-void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename) __attribute__ ((const));
-#ifdef UNIX
 
-const char* program_name;
-void print_usage(FILE* stream,int exit_code) __attribute__ ((__noreturn__));
-void print_usage(FILE* stream, int exit_code)
+#include <boost/program_options.hpp>
+
+#include <cstdint>
+
+#include <iterator>
+#include <algorithm>
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <string>
+
+static const char *  version = "4.1.0";
+static constexpr const unsigned long int blk_size = 1024;
+
+static std::vector<ocss_t> gen_subkey(std::string const& key)
 {
-	fprintf(stream, "Usage: %s [-e | -d] options -i input-file -o output-file\n", program_name);
-	fprintf(stream,
-		"\t-h\t--help\t\t\tDisplay this help page.\n"
-		"\t-e\t--encrypt\t\tEncrypt mode.\n"
-		"\t-d\t--decrypt\t\tDecrypt mode.\n"
-		"\t-D\t--data [input-data]\tImport Data.\n"
-		"\t-i\t--input [input-file]\tSelect input file.\n"
-		"\t-k\t--key [key]\t\tImport the key.\n"
-		"\t-v\t--version\t\tShow the Version.\n"
-		"\t-t\t--tui\t\t\tTUI mode\n");
-	exit(exit_code);
+	std::vector<ocss_t> keys;
+	for (char const x : key) {
+		keys.push_back(static_cast<ocss_t>(x));
+	}
+	return keys;
 }
-#endif
-std::vector<std::string> base64_read_file(std::string input_filename)
+
+static std::vector<ocss_t> get_data(std::string const& input_filename)
 {
-	std::ifstream fin(input_filename, std::ios::in);
-	if(!fin) {
-		std::cerr << "Error:Can not input this file.\n";
-		exit(-1);
-	}
-	std::string inputStr;
-	std::vector<std::string> inputContent;
-	while(getline(fin, inputStr)){
-		if(inputStr == "") continue;
-		inputContent.push_back(inputStr);
-	}
-#ifdef DEBUG
-	for(unsigned int i=0; i < inputContent.size();i++){
-		std::cout<<inputContent[i]<<std::endl;	
-	}
-#endif
-	fin.close();
-	return inputContent;
+	std::ifstream in(input_filename);
+	std::vector<ocss_t> result{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
+	in.close();
+	return result;
 }
-std::vector<std::string> read_file(std::string input_filename)
+
+static void write_data(std::string const& output_filename, std::vector<ocss_t> const& data)
 {
-	std::ifstream fin(input_filename, std::ios::in | std::ios::binary);
-	if(!fin) {
-		std::cerr << "Error:Can not input this file.\n";
-		exit(-1);
+	std::ofstream out(output_filename, std::ios::binary);
+	std::copy(data.cbegin(), data.cend(), std::ostreambuf_iterator<char>(out));
+	out.close();
+}
+
+static std::vector<std::vector<ocss_t> > get_ohformat(std::string const& input_filename)
+{
+	std::ifstream in;
+	in.open(input_filename, std::ios::in | std::ios::binary);
+	if (in.fail()) {
+		throw;
 	}
-	char inputChar;
-	std::string inputStr;
-	std::vector<std::string> inputContent;
-	unsigned int i = 0;	
-	while(!fin.eof()){
-		fin.get(inputChar);
-		inputStr.push_back(inputChar);
-		++i;
-		if(i == 128){
-			inputContent.push_back(inputStr);
-			inputStr = "";
-			i = 0;
+	std::vector<std::vector<ocss_t> >result;
+	while(1) {
+		uint64_t size;
+		in.read(reinterpret_cast<char *>(&size), sizeof(size));
+		if (in.eof()) {
+			break;
 		}
+		ocss_t *buf = new ocss_t[size];
+		in.read(reinterpret_cast<char *>(buf), size);
+		result.push_back(std::vector<ocss_t>(buf, buf+size));
+		delete []buf;
 	}
-	inputContent.push_back(inputStr);
-	inputStr = "";
-#ifdef DEBUG
-	for(unsigned int i=0; i < inputContent.size();i++){
-		std::cout<<inputContent[i]<<std::endl;	
-	}
-#endif
-	fin.close();
-	return inputContent;
+	return result;
 }
-inline void base64_write_file(std::string output_filename, std::vector<std::string> inputContent)
+
+static void write_ohformat(std::string const& output_filename, std::vector<std::vector<ocss_t> > const& data)
 {
-#ifdef DEBUG
-	auto cout_data = [=](std::vector<std::string> inputContent)->void
-			{
-				for(unsigned int i=0; i < inputContent.size(); i++){
-					std::cout << inputContent[i];
-				}
-			};
-	std::thread mThread(cout_data,inputContent);
-#endif
-	std::ofstream out(output_filename);		
-	for(unsigned int i=0; i < inputContent.size(); i++){
-		out << inputContent[i] << std::endl;
+	std::ofstream out;
+	out.open(output_filename, std::ios::out | std::ios::binary);
+	if (out.fail()) {
+		throw;
+	}
+	for (auto const &vec : data) {
+		uint64_t size = vec.size();
+		out.write(reinterpret_cast<const char *>(&size), sizeof(size));
+		out.write(reinterpret_cast<const char *>(&vec[0]), vec.size() * sizeof(vec[0]));
 	}
 	out.close();
-#ifdef DEBUG
-	mThread.join();
-#endif
 }
-inline void write_file(std::string output_filename, std::vector<std::string> inputContent)
+
+static void encrypt_mode(std::string const& input_filename, std::string key, std::string output_filename)
 {
-#ifdef DEBUG
-	auto cout_data = [=](std::vector<std::string> inputContent)->void
-			{
-				for(unsigned int i=0; i < inputContent.size(); i++){
-					std::cout << inputContent[i];
-				}
-			};
-	std::thread mThread(cout_data,inputContent);
-#endif
-	std::ofstream out(output_filename, std::ios::out | std::ios::binary);
-	for(unsigned int i=0; i < inputContent.size(); i++){
-		out << inputContent[i];
+	std::vector<ocss_t> keys(gen_subkey(key));
+	std::vector<ocss_t> data(get_data(input_filename));
+
+	std::vector<std::vector<ocss_t> >result;
+	for (auto it = data.begin(); it < data.end(); it += blk_size) {
+		std::vector<ocss_t> subvec(it, (it + blk_size) < data.end() ? it + blk_size : data.end());
+		result.push_back(OCSS::Encrypt(subvec, keys));
 	}
-	out.close();
-#ifdef DEBUG
-	mThread.join();
-#endif
+
+	write_ohformat(output_filename, result);
 }
-void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename)
+
+static void decrypt_mode(std::string const& input_filename, std::string key, std::string output_filename)
 {
-	std::vector<char> keys;
-	for (char &x : key) {
-		keys.push_back(x);
+	std::vector<ocss_t> keys(gen_subkey(key));
+	std::vector<ocss_t> result;
+
+	std::vector<std::vector<ocss_t> >data;
+	data = get_ohformat(input_filename);
+
+	std::reverse(keys.begin(), keys.end());
+	for (auto &vec : data) {
+		OCSS::Decrypt(vec, keys);
+		result.insert(result.end(), vec.cbegin(), vec.cend());
 	}
-	if(mode){
-		std::vector<std::string>&& inputContent = base64_read_file(input_filename);
-		std::reverse(keys.begin(), keys.end());
-		#pragma omp parallel for
-		for(unsigned int i=0; i < inputContent.size(); i++){
-			OCSS::Decrypt(inputContent[i], keys);
-			inputContent[i].erase(0,3);
-			inputContent[i] = Base64::Base64Decode(inputContent[i]);
-			std::cout << "Line:"<< i+1<<std::endl;
-			if(inputContent[i] != ""){
-				inputContent[i] = Base64::RmZero(inputContent[i]);
-			}
-		}
-		inputContent[inputContent.size() - 1].pop_back();
-		write_file(output_filename, inputContent);
-	}
-	else{
-		std::vector<std::string>&& inputContent = read_file(input_filename);
-		#pragma omp parallel for
-		for(unsigned int i=0; i < inputContent.size(); i++){
-#ifdef DEBUG
-			std::cout << inputContent[i] << std::endl;
-#endif
-			inputContent[i] = Base64Encode(inputContent[i]);
-			inputContent[i].insert(0,"aaa");
-			std::cout << "Line:"<< i+1<<std::endl;
-			inputContent[i] = OCSS::Encrypt(inputContent[i], keys);
-		}
-		base64_write_file(output_filename, inputContent);
+	write_data(output_filename, result);
+}
+
+static void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename)
+{
+	if (mode) {
+		encrypt_mode(input_filename, key, output_filename);
+	} else{
+		decrypt_mode(input_filename, key, output_filename);
 	}
 	exit(0);
 }
-inline void version_show()
+
+static void version_show()
 {
-#ifdef WIN32
-	std::cout<<"OH Crytoservice System on Windows\n Vesion "<<version<<'\n';
-	return;
-#endif
-#ifdef UNIX
-	std::cout<<"OH Crytoservice System on Unix\nVesion "<<version<<'\n';
-#endif
-#ifdef Unknown
-	std::cout<<"OH Crytoservice Systems\n Vesion "<<version<<'\n';
-#endif
-	exit(0);
+	std::cout<<"OH Crytoservice System\nVesion "<<version<<'\n';
 }
-#ifdef UNIX
-void tui_main()
-{
-	char* data = new char[1024];
-	char* key = new char[256];
-	initscr();
-	printw("OH Crytoservice System on Unix\nVesion %s\n", version);
-	refresh();
-	printw("Data: ");
-	refresh();
-	getnstr( data, 10231 );
-	printw("Key: ");
-	getnstr( key, 255);	
-	std::vector<char> keys;
-	std::string Key = key;
-	for (char x : Key) {
-		keys.push_back(x);
-	}
-	std::string Select;
-	printw("Encrypt or Decrypt");
-	refresh();
-	auto ch = getch();
-	switch(ch){
-		case 'D':
-			Select = "D";
-			printw("Decrypt mode\n");
-			break;
-		case 'E':
-			Select = "E";
-			printw("Encrypt mode\n");
-			break;
-		default:
-			Select = "E";
-			printw("Using defaault: Encrypt mode\n");
-	}
-	refresh();
-	if(Select == "E"){
-		std::string Data = data;
-		Data = Base64Encode(Data);
-		Data.insert(0,"aaa");
-		Data = OCSS::Encrypt(Data,keys);
-		data = &Data[0];
-		printw("%s\n", data);
-		refresh();
-	}
-	else{
-		std::string Data = data;
-		std::reverse(keys.begin(), keys.end());
-		OCSS::Decrypt(Data, keys);
-		Data.erase(0,3);
-		Data = Base64Decode(Data);
-		Data = RmZero(Data);
-		data = &Data[0];
-		printw("%s\n", data);
-		refresh();
-	}
-	delete(data);
-	delete(key);
-	getch();
-	endwin();
-	exit(0);
-}
-#endif
+
 int main(int argc, char* argv[]){
 	std::string key;
-	std::string data;
-	srand(time(NULL));
-#ifdef UNIX
-	int next_option;
-	const char* const short_options = "o:vhedi:k:t";
-	const struct option long_options[] = {
-		{"help",0,NULL,'h'},
-		{"encrypt",0,NULL,'e'},
-		{"decrypt",0,NULL,'d'},
-		//{"data",1,NULL,'D'},
-		{"input",1,NULL,'i'},
-		{"key",1,NULL,'k'},
-		{"version",0,NULL,'v'},
-		{"output",1,NULL,'o'},
-		{"tui",0,NULL,'t'},
-		{NULL,0,NULL,0}
-	};
-	std::string input_filename = "";
-	std::string output_filename = "";
-	int mode = 0; // Encrypt:0, Decrypt 1
-	program_name = argv[0];
-	do {
-		next_option = getopt_long (argc, argv, short_options,
-				long_options, NULL);
-		switch (next_option){
-			case 'h':
-				print_usage (stdout, 0);
-			case 'i':
-				input_filename = optarg;
-				break;
-			case 'd':
-				mode = 1;
-				break;
-			/*
-			case 'D':
-				data_mode = 0;
-				data = optarg;
-				data[0] = '\0';
-				data[data.length()] = '\0';
-				break;
-			*/
-			case 'e':
-				mode = 0;
-				break;
-			case 'k':
-				key = optarg;
-				break;
-			case 'v':
-				version_show();
-			case 'o':
-				output_filename = optarg;
-				break;
-			case 't':
-				tui_main();
-			case '?': /* The user specified an invalid option. */
-				print_usage (stderr, 1);
-			case -1:
-				break;
-			default:
-				abort();
+	std::string input_filename;
+	std::string output_filename;
+	bool encryption = false; // default:decrypt
+
+	namespace po = boost::program_options;
+	po::options_description desc("Allowed options");
+	desc.add_options()
+		("help", "produce help message")
+		("key,k", po::value<std::string>(&key), "set key")
+		("output,o", po::value<std::string>(&output_filename), "set output file")
+		("version", "produce version message")
+		("input,i", po::value<std::string>(&input_filename), "set input file")
+		("encrypt,e", "set operating mode: encrypt")
+		("decrypt,d", "set operating mode: decrypt");
+
+	po::positional_options_description p;
+	p.add("input", -1);
+
+	po::variables_map vm;
+	po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+	po::notify(vm); 
+
+	if (vm.count("help")) {
+		std::cout << desc << "\n";
+		return 0;
+	}
+	if (vm.count("version")) {
+		version_show();
+		return 0;
+	}
+	if (key.size() == 0) {
+		std::cerr << "FATAL: No Key.\n";
+		return 1;
+	}
+	if (vm.count("encrypt") && vm.count("decrypt")) {
+		std::cerr << "FATAL: CANNOT do encryption and decryption at the same time.\n";
+		return 1;
+	} else if (vm.count("encrypt")) {
+		if (input_filename.size() == 0) {
+			std::cerr << "FATAL: No Input File.\n";
+			return 1;
 		}
-	}while(next_option != -1);
-	if(!(input_filename.compare("")) || !(output_filename.compare("")))
-	{
-		std::cerr<<"ERROR: Input file or output file undefine."<<std::endl;
-		exit(0);
+		if (output_filename.size() == 0) {
+			output_filename = input_filename + ".ohcs";
+		}
+		encryption = true;
+	} else if (vm.count("decrypt")) {
+		if (input_filename.size() == 0) {
+			std::cerr << "FATAL: No Input File.\n";
+			return 1;
+		}
+		if (output_filename.size() == 0) {
+			std::size_t sz;
+			output_filename = input_filename;
+			if ((sz = input_filename.rfind(".ohcs")) == input_filename.size() - 5) {
+				output_filename.erase(sz, 5);
+			} else {
+				output_filename += ".dec";
+			}
+		}
+		encryption = false;
 	}
-	file_in_cs(mode,input_filename,key,output_filename);
-#endif
-#ifdef WIN32
-	using namespace std;
-	ios_base::sync_with_stdio(false);
-	std::string new_data = "";
-	version_show();
-	std::cout<<" File:\n";
-	getline(cin,data);
-	std::cout<<" Key:"<<'\n';
-	getline(cin,key);
-	std::string Select;
-	std::cout<<"[E]ncrypt or [D]ecrypt?\n";
-	std::cin>>Select;
-	if(Select == "E"){
-		file_in_cs(0,data,key,data);	
-	}
-	else{
-		file_in_cs(1,data,key,data);
-	}
-#endif
+	file_in_cs(encryption, input_filename, key, output_filename);
 	return 0;
 }

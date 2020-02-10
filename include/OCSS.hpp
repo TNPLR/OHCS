@@ -1,20 +1,10 @@
 #ifndef OCSS_H
 #define OCSS_H
-#include <string>
 #include <vector>
-#ifndef __GNUC__
-# define __attribute__(x) /*NOTHING*/
-#endif
-namespace OCSS{
-#ifdef SEOHCS
-	std::string SafetyEncrypt(std::string Data, std::vector<char> Key);
-#endif
-	std::string Encrypt(std::string Data,std::vector<char> Key);
-	void Decrypt(std::string& Data,std::vector<char>& Key);
-	void ToBase(std::string& Data,int Original_Base,int New_Base);
-#ifdef DEBUG
-	int Char_Value(char chars);
-	bool check();
-#endif
-};
+typedef unsigned char ocss_t;
+
+namespace OCSS {
+std::vector<ocss_t> Encrypt(std::vector<ocss_t> Data,std::vector<ocss_t> const& Key);
+void Decrypt(std::vector<ocss_t>& Data,std::vector<ocss_t> const& Key);
+}
 #endif // OCSS_H
