@@ -1,1 +1,1 @@
-noinst_HEADERS = del.hpp OCSS.hpp
+noinst_HEADERS = OCSS.hpp interface.hpp io.hpp

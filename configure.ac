@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([OHCS], [4.1.0], [chawteam21@gmail.com])
+AC_INIT([OHCS], [4.2.0], [chawteam21@gmail.com])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -26,6 +26,7 @@ AC_CHECK_LIB([gmpxx], [main])
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
 AC_TYPE_UINT64_T
+AC_TYPE_SIZE_T
 
 # Checks for library functions.
 

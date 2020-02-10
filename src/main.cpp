@@ -22,122 +22,14 @@ This is the main file of OHCS
 Made by Hsiaosvideo
   2017/07/21
 */
-#include "OCSS.hpp"
+#include "interface.hpp"
 
 #include <boost/program_options.hpp>
 
-#include <cstdint>
-
-#include <iterator>
-#include <algorithm>
-#include <vector>
 #include <iostream>
-#include <fstream>
 #include <string>
 
-static const char *  version = "4.1.0";
-static constexpr const unsigned long int blk_size = 1024;
-
-static std::vector<ocss_t> gen_subkey(std::string const& key)
-{
-	std::vector<ocss_t> keys;
-	for (char const x : key) {
-		keys.push_back(static_cast<ocss_t>(x));
-	}
-	return keys;
-}
-
-static std::vector<ocss_t> get_data(std::string const& input_filename)
-{
-	std::ifstream in(input_filename);
-	std::vector<ocss_t> result{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
-	in.close();
-	return result;
-}
-
-static void write_data(std::string const& output_filename, std::vector<ocss_t> const& data)
-{
-	std::ofstream out(output_filename, std::ios::binary);
-	std::copy(data.cbegin(), data.cend(), std::ostreambuf_iterator<char>(out));
-	out.close();
-}
-
-static std::vector<std::vector<ocss_t> > get_ohformat(std::string const& input_filename)
-{
-	std::ifstream in;
-	in.open(input_filename, std::ios::in | std::ios::binary);
-	if (in.fail()) {
-		throw;
-	}
-	std::vector<std::vector<ocss_t> >result;
-	while(1) {
-		uint64_t size;
-		in.read(reinterpret_cast<char *>(&size), sizeof(size));
-		if (in.eof()) {
-			break;
-		}
-		ocss_t *buf = new ocss_t[size];
-		in.read(reinterpret_cast<char *>(buf), size);
-		result.push_back(std::vector<ocss_t>(buf, buf+size));
-		delete []buf;
-	}
-	return result;
-}
-
-static void write_ohformat(std::string const& output_filename, std::vector<std::vector<ocss_t> > const& data)
-{
-	std::ofstream out;
-	out.open(output_filename, std::ios::out | std::ios::binary);
-	if (out.fail()) {
-		throw;
-	}
-	for (auto const &vec : data) {
-		uint64_t size = vec.size();
-		out.write(reinterpret_cast<const char *>(&size), sizeof(size));
-		out.write(reinterpret_cast<const char *>(&vec[0]), vec.size() * sizeof(vec[0]));
-	}
-	out.close();
-}
-
-static void encrypt_mode(std::string const& input_filename, std::string key, std::string output_filename)
-{
-	std::vector<ocss_t> keys(gen_subkey(key));
-	std::vector<ocss_t> data(get_data(input_filename));
-
-	std::vector<std::vector<ocss_t> >result;
-	for (auto it = data.begin(); it < data.end(); it += blk_size) {
-		std::vector<ocss_t> subvec(it, (it + blk_size) < data.end() ? it + blk_size : data.end());
-		result.push_back(OCSS::Encrypt(subvec, keys));
-	}
-
-	write_ohformat(output_filename, result);
-}
-
-static void decrypt_mode(std::string const& input_filename, std::string key, std::string output_filename)
-{
-	std::vector<ocss_t> keys(gen_subkey(key));
-	std::vector<ocss_t> result;
-
-	std::vector<std::vector<ocss_t> >data;
-	data = get_ohformat(input_filename);
-
-	std::reverse(keys.begin(), keys.end());
-	for (auto &vec : data) {
-		OCSS::Decrypt(vec, keys);
-		result.insert(result.end(), vec.cbegin(), vec.cend());
-	}
-	write_data(output_filename, result);
-}
-
-static void file_in_cs(int mode,std::string input_filename, std::string key, std::string output_filename)
-{
-	if (mode) {
-		encrypt_mode(input_filename, key, output_filename);
-	} else{
-		decrypt_mode(input_filename, key, output_filename);
-	}
-	exit(0);
-}
+static const char *  version = "4.2.0";
 
 static void version_show()
 {

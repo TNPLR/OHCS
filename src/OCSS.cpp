@@ -1,15 +1,14 @@
 #include "OCSS.hpp"
-#include "del.hpp"
 
 #include <gmpxx.h>
 
 #include <stdexcept>
 #include <vector>
-#include <algorithm> // std::reverse
+#include <algorithm> // std::reverse std::remove
 #include <random>
 
 constexpr const unsigned int key_max = 256;
-constexpr const unsigned int insert_time = 16;
+constexpr const unsigned int insert_time = 12;
 
 static void ToBase(std::vector<ocss_t>& Data, unsigned int Original_Base, unsigned int New_Base)
 {
@@ -27,19 +26,18 @@ static void ToBase(std::vector<ocss_t>& Data, unsigned int Original_Base, unsign
 
 	mpz_class total_value = 0;
 	for(unsigned char const data : Data) {
-		total_value *= Original_Base;
-		total_value += data;
+		total_value = total_value * Original_Base + data;
 	}
 	Data.clear();
 	while (total_value > 0) {
-		mpz_class left = total_value % New_Base;
+		mpz_class left;
+		mpz_tdiv_qr_ui(total_value.get_mpz_t(), left.get_mpz_t(), total_value.get_mpz_t(), New_Base);
 		Data.push_back(static_cast<ocss_t>(left.get_ui()));
-		total_value = (total_value - left) / New_Base;
 	}
 	std::reverse(Data.begin(), Data.end());
 }
 
-std::vector<ocss_t> OCSS::Encrypt(std::vector<ocss_t> Data,std::vector<ocss_t> const& Key)
+std::vector<ocss_t>&& OCSS::Encrypt(std::vector<ocss_t>&& Data,std::vector<ocss_t> const& Key)
 {
 	unsigned int last_key = key_max;
 	std::random_device rd;
@@ -56,7 +54,7 @@ std::vector<ocss_t> OCSS::Encrypt(std::vector<ocss_t> Data,std::vector<ocss_t> c
 		last_key = static_cast<unsigned int>(plugin_key) + 1;
 	}
 	ToBase(Data, last_key, key_max);
-	return Data;
+	return std::move(Data);
 }
 
 void OCSS::Decrypt(std::vector<ocss_t>& Data,std::vector<ocss_t> const& Key)
@@ -64,7 +62,7 @@ void OCSS::Decrypt(std::vector<ocss_t>& Data,std::vector<ocss_t> const& Key)
 	unsigned int last_key = key_max;
 	for (ocss_t const remove_key : Key) {
 		ToBase(Data, last_key, static_cast<unsigned int>(remove_key) + 1);
-		dell::del(Data, remove_key);
+		Data.erase(std::remove(Data.begin(), Data.end(), remove_key), Data.end());
 		last_key = remove_key;
 	}
 	ToBase(Data, last_key, key_max);
