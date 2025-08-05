@@ -24,7 +24,14 @@ into a string. Therefore, OHCS can encrypt the same string to the different stri
 # Notice
 The compiler needs to support c++11 standard
 # INSTALL
-Please read INSTALL before installing the program. Please use visual studio C++ compiler or g++ compiler
+Please read INSTALL before installing the program.
+```
+$ mkdir build
+$ cd build
+$ cmake ..
+$ cmake --build .
+# cmake --install . # RUN AS ROOT
+```
 # Bugs
 No known bugs
 # Sample

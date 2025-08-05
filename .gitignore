@@ -8,6 +8,8 @@ CMakeF*
 *.a
 *.log
 
+build/
+
 .vscode
 
 # http://www.gnu.org/software/automake
