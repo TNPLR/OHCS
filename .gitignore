@@ -7,6 +7,9 @@ CMakeC*
 CMakeF*
 *.a
 *.log
+
+.vscode
+
 # http://www.gnu.org/software/automake
 
 Makefile.in
